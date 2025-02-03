@@ -17,5 +17,5 @@ type FCNGradientBase interface {
 	 * given point in parameter space. The size of the output gradient vector
 	 * must be equal to the size of the input parameter vector.
 	 */
-	gradient(par []float64) []float64
+	Gradient(par []float64) []float64
 }

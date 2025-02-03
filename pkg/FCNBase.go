@@ -8,5 +8,5 @@ type FCNBase interface {
 	/*
 	 * Returns the value of the function with the given parameters.
 	 */
-	valueOf(par []float64) float64
+	ValueOf(par []float64) float64
 }

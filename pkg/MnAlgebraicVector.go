@@ -12,7 +12,7 @@ func NewMnAlgebraicVector(size int) *MnAlgebraicVector {
 	}
 }
 
-func (this *MnAlgebraicVector) clone() *MnAlgebraicVector {
+func (this *MnAlgebraicVector) Clone() *MnAlgebraicVector {
 	var result *MnAlgebraicVector = NewMnAlgebraicVector(len(this.data))
 	result.data = slices.Clone(this.data)
 	return result
@@ -33,6 +33,6 @@ func (this *MnAlgebraicVector) set(i int, value float64) {
 func (this *MnAlgebraicVector) asArray() []float64 {
 	return this.data
 }
-func (this *MnAlgebraicVector) toString() string {
+func (this *MnAlgebraicVector) ToString() string {
 	return MnPrint.toMnAlgebraicVectorString(this)
 }
