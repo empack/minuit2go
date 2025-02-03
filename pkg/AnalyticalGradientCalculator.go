@@ -24,7 +24,7 @@ func (this *AnalyticalGradientCalculator) gradient(par MinimumParameters) (*Func
 
 	var v MnAlgebraicVector = NewMnAlgebraicVector(par.vec().size())
 	for i := 0; i < par.vec().size(); i++ {
-		var ext int64 = this.theTransformation.extOfInt(i)
+		var ext int = this.theTransformation.extOfInt(i)
 		if this.theTransformation.parameter(ext).hasLimits() {
 			var dd float64 = this.theTransformation.dInt2Ext(i, par.vec().get(i))
 			v.set(i, dd*grad[ext])
