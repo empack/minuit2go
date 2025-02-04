@@ -87,7 +87,7 @@ func (this *MnUserTransformation) precision() *MnMachinePrecision {
 }
 
 func (this *MnUserTransformation) setPrecision(eps float64) {
-	this.thePrecision.setPrecision(eps)
+	this.thePrecision.SetPrecision(eps)
 }
 
 func (this *MnUserTransformation) parameters() []*MinuitParameter {
