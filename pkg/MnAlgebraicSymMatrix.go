@@ -24,22 +24,22 @@ func NewMnAlgebraicSymMatrix(n int) (*MnAlgebraicSymMatrix, error) {
 	}, nil
 }
 
-func (asm *MnAlgebraicSymMatrix) invert() error {
-	if asm.theSize == 1 {
-		tmp := asm.theData[0]
+func (this *MnAlgebraicSymMatrix) invert() error {
+	if this.theSize == 1 {
+		tmp := this.theData[0]
 		if tmp <= 0.0 {
 			return errors.New("matrix inversion failed")
 		}
 
-		asm.theData[0] = 1.0 / tmp
+		this.theData[0] = 1.0 / tmp
 	} else {
-		nrow := asm.theNRow
+		nrow := this.theNRow
 		s := make([]float64, nrow)
 		q := make([]float64, nrow)
 		pp := make([]float64, nrow)
 
 		for i := 0; i < nrow; i++ {
-			si := asm.theData[asm.theIndex(i, i)]
+			si := this.theData[this.theIndex(i, i)]
 			if si < 0.0 {
 				return errors.New("matrix inversion failed")
 			}
@@ -49,44 +49,44 @@ func (asm *MnAlgebraicSymMatrix) invert() error {
 
 		for i := 0; i < nrow; i++ {
 			for j := 0; j < nrow; j++ {
-				var10000 := asm.theData
-				var10001 := asm.theIndex(i, j)
+				var10000 := this.theData
+				var10001 := this.theIndex(i, j)
 				var10000[var10001] *= s[i] * s[j]
 			}
 		}
 
 		for i := 0; i < nrow; i++ {
 			k := i
-			if asm.theData[asm.theIndex(i, i)] == 0.0 {
+			if this.theData[this.theIndex(i, i)] == 0.0 {
 				return errors.New("matrix inversion failed")
 			}
 
-			q[i] = 1.0 / asm.theData[asm.theIndex(i, i)]
+			q[i] = 1.0 / this.theData[this.theIndex(i, i)]
 			pp[i] = 1.0
-			asm.theData[asm.theIndex(i, i)] = 0.0
+			this.theData[this.theIndex(i, i)] = 0.0
 			kp1 := i + 1
 			if i != 0 {
 				for j := 0; j < k; j++ {
-					index := asm.theIndex(j, k)
-					pp[j] = asm.theData[index]
-					q[j] = asm.theData[index] * q[k]
-					asm.theData[index] = 0.0
+					index := this.theIndex(j, k)
+					pp[j] = this.theData[index]
+					q[j] = this.theData[index] * q[k]
+					this.theData[index] = 0.0
 				}
 			}
 
 			if k != nrow-1 {
 				for j := kp1; j < nrow; j++ {
-					index := asm.theIndex(k, j)
-					pp[j] = asm.theData[index]
-					q[j] = asm.theData[index] * q[k]
-					asm.theData[index] = 0.0
+					index := this.theIndex(k, j)
+					pp[j] = this.theData[index]
+					q[j] = this.theData[index] * q[k]
+					this.theData[index] = 0.0
 				}
 			}
 
 			for j := 0; j < nrow; j++ {
 				for var16 := j; var16 < nrow; var16++ {
-					var21 := asm.theData
-					var23 := asm.theIndex(j, var16)
+					var21 := this.theData
+					var23 := this.theIndex(j, var16)
 					var21[var23] += pp[j] * q[var16]
 				}
 			}
@@ -94,8 +94,8 @@ func (asm *MnAlgebraicSymMatrix) invert() error {
 
 		for j := 0; j < nrow; j++ {
 			for k := j; k < nrow; k++ {
-				var22 := asm.theData
-				var24 := asm.theIndex(j, k)
+				var22 := this.theData
+				var24 := this.theIndex(j, k)
 				var22[var24] *= s[j] * s[k]
 			}
 		}
@@ -104,7 +104,7 @@ func (asm *MnAlgebraicSymMatrix) invert() error {
 	return nil
 }
 
-func (asm *MnAlgebraicSymMatrix) theIndex(row, col int) int {
+func (this *MnAlgebraicSymMatrix) theIndex(row, col int) int {
 	if row > col {
 		return col + row*(row+1)/2
 	}
@@ -112,38 +112,38 @@ func (asm *MnAlgebraicSymMatrix) theIndex(row, col int) int {
 	return row + col*(col+1)/2
 }
 
-func (asm *MnAlgebraicSymMatrix) get(row, col int) (float64, error) {
-	if row < asm.theNRow && col < asm.theNRow {
-		return asm.theData[asm.theIndex(row, col)], nil
+func (this *MnAlgebraicSymMatrix) get(row, col int) (float64, error) {
+	if row < this.theNRow && col < this.theNRow {
+		return this.theData[this.theIndex(row, col)], nil
 	}
 
 	return 0, errors.New("array index out of bounds")
 }
 
-func (asm *MnAlgebraicSymMatrix) set(row, col int, value float64) error {
-	if row < asm.theNRow && col < asm.theNRow {
-		asm.theData[asm.theIndex(row, col)] = value
+func (this *MnAlgebraicSymMatrix) set(row, col int, value float64) error {
+	if row < this.theNRow && col < this.theNRow {
+		this.theData[this.theIndex(row, col)] = value
 	}
 
 	return errors.New("array index out of bounds")
 }
 
-func (asm *MnAlgebraicSymMatrix) Clone() *MnAlgebraicSymMatrix {
-	c, _ := NewMnAlgebraicSymMatrix(asm.theNRow)
-	copyData := make([]float64, asm.theSize)
-	copy(copyData, asm.theData)
+func (this *MnAlgebraicSymMatrix) Clone() *MnAlgebraicSymMatrix {
+	c, _ := NewMnAlgebraicSymMatrix(this.theNRow)
+	copyData := make([]float64, this.theSize)
+	copy(copyData, this.theData)
 	c.theData = copyData
 	return c
 }
 
-func (asm *MnAlgebraicSymMatrix) eigenvalues() (*MnAlgebraicVector, error) {
-	nrow := asm.theNRow
+func (this *MnAlgebraicSymMatrix) eigenvalues() (*MnAlgebraicVector, error) {
+	nrow := this.theNRow
 	tmp := make([]float64, (nrow+1)*(nrow+1))
 	work := make([]float64, 1+2+nrow)
 
 	for i := 0; i < nrow; i++ {
 		for j := 0; j <= i; j++ {
-			v, err := asm.get(i, j)
+			v, err := this.get(i, j)
 			if err != nil {
 				return nil, err
 			}
@@ -152,7 +152,7 @@ func (asm *MnAlgebraicSymMatrix) eigenvalues() (*MnAlgebraicVector, error) {
 		}
 	}
 
-	info := asm.mneigen(tmp, nrow, nrow, len(work), work, 1.0e-6)
+	info := this.mneigen(tmp, nrow, nrow, len(work), work, 1.0e-6)
 	if info != 0 {
 		return nil, errors.New("eigen value failed")
 	} else {
@@ -165,7 +165,7 @@ func (asm *MnAlgebraicSymMatrix) eigenvalues() (*MnAlgebraicVector, error) {
 	}
 }
 
-func (asm *MnAlgebraicSymMatrix) mneigen(a []float64, ndima, n, mits int, work []float64, precis float64) int {
+func (this *MnAlgebraicSymMatrix) mneigen(a []float64, ndima, n, mits int, work []float64, precis float64) int {
 	m := 0
 	a_dim1 := ndima
 	// unused: a_offset := 1 + ndima*1
@@ -411,18 +411,18 @@ func (asm *MnAlgebraicSymMatrix) mneigen(a []float64, ndima, n, mits int, work [
 	return ifault
 }
 
-func (asm *MnAlgebraicSymMatrix) data() []float64 {
-	return asm.theData
+func (this *MnAlgebraicSymMatrix) data() []float64 {
+	return this.theData
 }
 
-func (asm *MnAlgebraicSymMatrix) size() int {
-	return asm.theSize
+func (this *MnAlgebraicSymMatrix) size() int {
+	return this.theSize
 }
 
-func (asm *MnAlgebraicSymMatrix) nrow() int {
-	return asm.theNRow
+func (this *MnAlgebraicSymMatrix) nrow() int {
+	return this.theNRow
 }
 
-func (asm *MnAlgebraicSymMatrix) ncol() int {
-	return asm.nrow()
+func (this *MnAlgebraicSymMatrix) ncol() int {
+	return this.nrow()
 }
