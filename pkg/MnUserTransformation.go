@@ -71,7 +71,7 @@ func NewMnUserTransformationFrom(par, err []float64) *MnUserTransformation {
 		theDoubleLimTrafo: NewSinParameterTransformation(),
 		theUpperLimTrafo:  NewSqrtUpParameterTransformation(),
 		theLowerLimTrafo:  NewSqrtLowParameterTransformation(),
-		theParameters:     make([]MinuitParameter, len(par)),
+		theParameters:     make([]*MinuitParameter, len(par)),
 		theExtOfInt:       make([]int, len(par)),
 		theCache:          make([]float64, 0),
 	}
@@ -102,14 +102,14 @@ func (this *MnUserTransformation) variableParameters() int {
 func (this *MnUserTransformation) params() []float64 {
 	var result []float64 = make([]float64, len(this.theParameters))
 	for i := 0; i < len(this.theParameters); i++ {
-		result[i] = parameter.value()
+		result[i] = this.theParameters[i].Value()
 	}
 	return result
 }
 func (this *MnUserTransformation) errors() []float64 {
 	var result []float64 = make([]float64, len(this.theParameters))
 	for i := 0; i < len(this.theParameters); i++ {
-		result[i] = parameter.error()
+		result[i] = this.theParameters[i].Error()
 	}
 	return result
 }
@@ -127,7 +127,7 @@ func (this *MnUserTransformation) addFree(name string, val, err float64) error {
 	this.nameMap[name] = len(this.theParameters)
 	this.theExtOfInt = append(this.theExtOfInt, len(this.theParameters))
 	this.theCache = append(this.theCache, val)
-	this.theParameters = append(this.theParameters, NewMinuitParameterFree(len(this.theParameters), name, val, err))
+	this.theParameters = append(this.theParameters, NewMinuitParameterStandard(len(this.theParameters), name, val, err))
 	return nil
 }
 
@@ -139,7 +139,11 @@ func (this *MnUserTransformation) addLimited(name string, val, err, low, up floa
 	this.nameMap[name] = len(this.theParameters)
 	this.theExtOfInt = append(this.theExtOfInt, len(this.theParameters))
 	this.theCache = append(this.theCache, val)
-	this.theParameters = append(this.theParameters, NewMinuitParameterLimited(len(this.theParameters), name, val, err, low, up))
+	if param, paramErr := NewMinuitParameterLimited(len(this.theParameters), name, val, err, low, up); paramErr != nil {
+		return paramErr
+	} else {
+		this.theParameters = append(this.theParameters, param)
+	}
 	return nil
 }
 
@@ -150,7 +154,7 @@ func (this *MnUserTransformation) add(name string, val float64) error {
 	}
 	this.nameMap[name] = len(this.theParameters)
 	this.theCache = append(this.theCache, val)
-	this.theParameters = append(this.theParameters, NewMinuitParameter(len(this.theParameters), name, val))
+	this.theParameters = append(this.theParameters, NewMinuitParameterConstant(len(this.theParameters), name, val))
 	return nil
 }
 
@@ -317,11 +321,11 @@ func (this *MnUserTransformation) ext2int(i int, val float64) float64 {
 	var parm *MinuitParameter = this.theParameters[i]
 	if parm.HasLimits() {
 		if parm.HasUpperLimit() && parm.HasLowerLimit() {
-			return this.theDoubleLimTrafo.ext2int(val, parm.UpperLimit(), parm.LowerLimit(), precision())
+			return this.theDoubleLimTrafo.ext2int(val, parm.UpperLimit(), parm.LowerLimit(), this.precision())
 		} else if parm.HasUpperLimit() && !parm.HasLowerLimit() {
-			return this.theUpperLimTrafo.ext2int(val, parm.UpperLimit(), precision())
+			return this.theUpperLimTrafo.ext2int(val, parm.UpperLimit(), this.precision())
 		} else {
-			return this.theLowerLimTrafo.ext2int(val, parm.LowerLimit(), precision())
+			return this.theLowerLimTrafo.ext2int(val, parm.LowerLimit(), this.precision())
 		}
 	}
 	return val
