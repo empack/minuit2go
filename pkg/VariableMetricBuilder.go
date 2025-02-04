@@ -42,30 +42,30 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc *GradientCalculator, s
 	edmval float64) (*FunctionMinimum, error) {
 	edmval *= 1.0e-4
 	if seed.parameters().vec().size() == 0 {
-		return NewFunctionMinimum(seed, fcn.errorDef())
+		return NewFunctionMinimumWithSeedUp(seed, fcn.errorDef()), nil
 	} else {
 		prec := seed.precision()
-		result := make(*MinimumState, 8)
+		result := make([]*MinimumState, 8)
 		edm := seed.state().edm()
 		if edm < 0.0 {
 			fmt.Println("VariableMetricBuilder: initial matrix not pos.def")
 			if seed.error().isPosDef() {
 				return nil, errors.New("something is wrong")
 			} else {
-				return NewFunctionMinimum(seed, fcn.errorDef())
+				return NewFunctionMinimumWithSeedUp(seed, fcn.errorDef()), nil
 			}
 		} else {
-			result = append(result, seet.state())
+			result = append(result, seed.state())
 			edm *= 1.0 + 3.0*seed.error().dcovar()
 
 			for {
-				s0 := result[(result.size() - 1)]
+				s0 := result[(len(result) - 1)]
 				mvsm, err := MnUtils.MulVSM(s0.error().invHessian(), s0.gradient().vec())
 				if err != nil {
 					return nil, err
 				}
 				step := MnUtils.MulV(mvsm, -1.0)
-				gdel, err := InnerProduct(step, s0.gradient().grad())
+				gdel, err := MnUtils.InnerProduct(step, s0.gradient().grad())
 				if err != nil {
 					return nil, err
 				}
@@ -85,7 +85,7 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc *GradientCalculator, s
 					fmt.Printf("gdel: %f", gdel)
 					if gdel > 0.0 {
 						result = append(result, s0)
-						return NewFunctionMinimum(seed, result, fcn.errorDef()), nil
+						return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
 					}
 				}
 
@@ -95,17 +95,28 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc *GradientCalculator, s
 					break
 				}
 
-				p := NewMinimumParameters(MnUtils.AddV(s0.vec, MnUtils.MulV(step, pp.x())), pp.y())
+				// TODO: hier noch error handling
+				added, err := MnUtils.AddV(s0.vec, MnUtils.MulV(step, pp.x()))
+				if err != nil {
+					return nil, err
+				}
+				p := NewMinimumParameters(added, pp.y())
 				g := gc.GradientWithGrad(p, s0.gradient())
-				edm = this.estimator().estimate(g, s0.error())
+				edm, err = this.estimator().estimate(g, s0.error())
+				if err != nil {
+					return nil, err
+				}
 				if edm < 0.0 {
 					fmt.Println("VariableMetricBuilder: matrix not pos.def")
 					fmt.Println("edm < 0")
 					s0 = MnPosDef.TestState(s0, prec)
-					edm = this.estimator().estimate(g, s0.error())
+					edm, err = this.estimator().estimate(g, s0.error())
+					if err != nil {
+						return nil, err
+					}
 					if edm < 0.0 {
 						result = append(result, s0)
-						return NewFunctionMinimum(seed, result, fcn.errorDef()), nil
+						return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
 					}
 				}
 
@@ -122,20 +133,20 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc *GradientCalculator, s
 
 			if fcn.numOfCalls() >= maxfcn {
 				fmt.Println("VariableMetricBuilder: call limit exceeded")
-				return NewFunctionMinimum(seed, result, fcn.errorDef(), FunctionMinimum.MnReachedCallLimit())
+				return NewFunctionMinimumWithSeedStatesUpReachedCallLimit(seed, result, fcn.errorDef()), nil
 			} else if edm > edmval {
 				if edm < math.Abs(prec.eps2()*result[result.size()-1].fval()) {
 					fmt.Println("VariableMetricBuilder: machine accuracy limits further improvement.")
-					return NewFunctionMinimum(seed, result, fcn.errorDef()), nil
+					return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
 				} else if edm < 10.0*edmval {
-					return NewFunctionMinimum(seed, result, fcn.errorDef()), nil
+					return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
 				} else {
 					fmt.Println("VariableMetricBuilder: finishes without convergence.")
 					fmt.Printf("VariableMetricBuilder: edm= %f requested: %f\n", edm, edmval)
-					return NewFunctionMinimum(seed, result, fcn.errorDef()), nil
+					return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
 				}
 			} else {
-				return NewFunctionMinimum(seed, result, fcn.errorDef())
+				return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
 			}
 		}
 	}
