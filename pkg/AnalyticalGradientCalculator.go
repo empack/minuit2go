@@ -17,7 +17,7 @@ func NewAnalyticalGradientCalculator(fcn FCNGradientBase, state *MnUserTransform
 }
 
 func (this *AnalyticalGradientCalculator) Gradient(par *MinimumParameters) (*FunctionGradient, error) {
-	var grad []float64 = this.theGradCalc.gradient(this.theTransformation.transform(par.vec()).data())
+	var grad []float64 = this.theGradCalc.Gradient(this.theTransformation.transform(par.vec()).data)
 	if len(grad) != this.theTransformation.parameters().size() {
 		return nil, errors.New("IllegalArgumentException: Invalid parameter size")
 	}
