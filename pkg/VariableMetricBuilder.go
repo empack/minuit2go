@@ -18,7 +18,7 @@ func NewVariableMetricBuilder() *VariableMetricBuilder {
 	}
 }
 
-func (this *VariableMetricBuilder) Minimum(fcn *MnFcn, gc *GradientCalculator, seed *MinimumSeed, strategy *MnStrategy,
+func (this *VariableMetricBuilder) Minimum(fcn *MnFcn, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy,
 	maxfcn int,
 	edmval float64) (*FunctionMinimum, error) {
 	fmin, err := this.minimum(fcn, gc, seed, maxfcn, edmval)
@@ -38,7 +38,7 @@ func (this *VariableMetricBuilder) Minimum(fcn *MnFcn, gc *GradientCalculator, s
 	return fmin, nil
 }
 
-func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc *GradientCalculator, seed *MinimumSeed, maxfcn int,
+func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc GradientCalculator, seed *MinimumSeed, maxfcn int,
 	edmval float64) (*FunctionMinimum, error) {
 	edmval *= 1.0e-4
 	if seed.parameters().vec().size() == 0 {
@@ -102,7 +102,7 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc *GradientCalculator, s
 				}
 				p := NewMinimumParameters(added, pp.y())
 				g := gc.GradientWithGrad(p, s0.gradient())
-				edm, err = this.estimator().estimate(g, s0.error())
+				edm, err = this.estimator().estimate(*g, *s0.error())
 				if err != nil {
 					return nil, err
 				}
@@ -110,7 +110,7 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc *GradientCalculator, s
 					fmt.Println("VariableMetricBuilder: matrix not pos.def")
 					fmt.Println("edm < 0")
 					s0 = MnPosDef.TestState(s0, prec)
-					edm, err = this.estimator().estimate(g, s0.error())
+					edm, err = this.estimator().estimate(*g, *s0.error())
 					if err != nil {
 						return nil, err
 					}
