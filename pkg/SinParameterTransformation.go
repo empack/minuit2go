@@ -4,6 +4,10 @@ import "math"
 
 type SinParameterTransformation struct{}
 
+func NewSinParameterTransformation() *SinParameterTransformation {
+	return &SinParameterTransformation{}
+}
+
 func (this *SinParameterTransformation) int2ext(value, upper, lower float64) float64 {
 	return lower + 0.5*(upper-lower)*(math.Sin(value)+1.0)
 }
