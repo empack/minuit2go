@@ -1,6 +1,7 @@
 package minuit
 
 type VariableMetricMinimizer struct {
+	ModularFunctionMinimizer
 	theMinSeedGen *MnSeedGenerator
 	theMinBuilder *VariableMetricBuilder
 }
@@ -12,9 +13,9 @@ func NewVariableMetricMinimizer() *VariableMetricMinimizer {
 	}
 }
 
-func (this *VariableMetricMinimizer) SeedGenerator() *MinimumSeedGenerator {
+func (this *VariableMetricMinimizer) SeedGenerator() MinimumSeedGenerator {
 	return this.theMinSeedGen
 }
-func (this *VariableMetricMinimizer) Builder() *MinimumBuilder {
+func (this *VariableMetricMinimizer) Builder() MinimumBuilder {
 	return this.theMinBuilder
 }
