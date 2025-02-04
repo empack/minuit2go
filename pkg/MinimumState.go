@@ -11,7 +11,7 @@ type MinimumState struct {
 func NewMinimumStateFromNumber(n int) *MinimumState {
 	return &MinimumState{
 		theParameters: NewMinimumParametersFromNumber(n),
-		theError:      NewMinimumError(n),
+		theError:      NewMinimumErrorFromNumber(n),
 		theGradient:   NewFunctionGradientFromNumber(n),
 	}
 }
@@ -29,7 +29,7 @@ func NewMinimumStateWithGrad(states *MinimumParameters, err *MinimumError, grad 
 func NewMinimumState(states *MinimumParameters, edm float64, nfcn int) *MinimumState {
 	return &MinimumState{
 		theParameters: states,
-		theError:      NewMinimumError(states.vec().size()),
+		theError:      NewMinimumErrorFromNumber(states.vec().size()),
 		theGradient:   NewFunctionGradientFromNumber(states.vec().size()),
 		theEDM:        edm,
 		theNFcn:       nfcn,

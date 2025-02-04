@@ -113,24 +113,31 @@ func (this *MinimumError) hessian() *MnAlgebraicSymMatrix {
 func (this *MinimumError) dcovar() float64 {
 	return this.theDCovar
 }
+
 func (this *MinimumError) isAccurate() bool {
 	return this.theDCovar < 0.1
 }
+
 func (this *MinimumError) isValid() bool {
 	return this.theValid
 }
+
 func (this *MinimumError) isPosDef() bool {
 	return this.thePosDef
 }
+
 func (this *MinimumError) isMadePosDef() bool {
 	return this.theMadePosDef
 }
+
 func (this *MinimumError) hesseFailed() bool {
 	return this.theHesseFailed
 }
+
 func (this *MinimumError) invertFailed() bool {
 	return this.theInvertFailed
 }
+
 func (this *MinimumError) isAvailable() bool {
 	return this.theAvailable
 }
