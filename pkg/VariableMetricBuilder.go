@@ -95,8 +95,7 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc GradientCalculator, se
 					break
 				}
 
-				// TODO: hier noch error handling
-				added, err := MnUtils.AddV(s0.vec, MnUtils.MulV(step, pp.x()))
+				added, err := MnUtils.AddV(s0.vec(), MnUtils.MulV(step, pp.x()))
 				if err != nil {
 					return nil, err
 				}
@@ -135,7 +134,7 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc GradientCalculator, se
 				fmt.Println("VariableMetricBuilder: call limit exceeded")
 				return NewFunctionMinimumWithSeedStatesUpReachedCallLimit(seed, result, fcn.errorDef()), nil
 			} else if edm > edmval {
-				if edm < math.Abs(prec.eps2()*result[result.size()-1].fval()) {
+				if edm < math.Abs(prec.eps2()*result[len(result)-1].fval()) {
 					fmt.Println("VariableMetricBuilder: machine accuracy limits further improvement.")
 					return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
 				} else if edm < 10.0*edmval {
