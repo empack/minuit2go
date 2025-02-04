@@ -8,7 +8,7 @@ type MinimumParameters struct {
 	theHasStep    bool
 }
 
-func NewMinimumParametersByNumber(n int) *MinimumParameters {
+func NewMinimumParametersFromNumber(n int) *MinimumParameters {
 	return &MinimumParameters{
 		theParameters: NewMnAlgebraicVector(n),
 		theStepSize:   NewMnAlgebraicVector(n),
@@ -25,7 +25,7 @@ func NewMinimumParameters(avec *MnAlgebraicVector, fval float64) *MinimumParamet
 
 }
 
-func NewMinimumParametersByMnAlgebraicVectors(avec, dirin *MnAlgebraicVector, fval float64) *MinimumParameters {
+func NewMinimumParametersFromMnAlgebraicVectors(avec, dirin *MnAlgebraicVector, fval float64) *MinimumParameters {
 	return &MinimumParameters{
 		theParameters: avec,
 		theStepSize:   dirin,
