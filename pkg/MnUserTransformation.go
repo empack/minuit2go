@@ -56,7 +56,7 @@ func (this *MnUserTransformation) transform(pstates *MnAlgebraicVector) *MnAlgeb
 		result.set(i, this.theCache[i])
 	}
 	for i := 0; i < pstates.size(); i++ {
-		if this.theParameters[this.theExtOfInt[i]].hasLimits() {
+		if this.theParameters[this.theExtOfInt[i]].HasLimits() {
 			result.set(this.theExtOfInt[i], this.int2ext(i, pstates.get(i)))
 		} else {
 			result.set(this.theExtOfInt[i], pstates.get(i))
@@ -161,7 +161,7 @@ func (this *MnUserTransformation) fix(index int) error {
 		return err
 	}
 	this.theExtOfInt = append(this.theExtOfInt[:iind], this.theExtOfInt[iind+1:]...)
-	this.theParameters[index].fix()
+	this.theParameters[index].Fix()
 	return nil
 }
 
@@ -171,41 +171,41 @@ func (this *MnUserTransformation) release(index int) error {
 	}
 	this.theExtOfInt = append(this.theExtOfInt, index)
 	slices.Sort(this.theExtOfInt)
-	this.theParameters[index].release()
+	this.theParameters[index].Release()
 	return nil
 }
 
 func (this *MnUserTransformation) setValue(index int, val float64) {
-	this.theParameters[index].setValue(val)
+	this.theParameters[index].SetValue(val)
 	this.theCache[index] = val
 }
 
 func (this *MnUserTransformation) setError(index int, err float64) {
-	this.theParameters[index].setError(err)
+	this.theParameters[index].SetError(err)
 }
 
 func (this *MnUserTransformation) setLimits(index int, low, up float64) {
-	this.theParameters[index].setLimits(low, up)
+	this.theParameters[index].SetLimits(low, up)
 }
 
 func (this *MnUserTransformation) setUpperLimit(index int, up float64) {
-	this.theParameters[index].setUpperLimit(up)
+	this.theParameters[index].SetUpperLimit(up)
 }
 
 func (this *MnUserTransformation) setLowerLimit(index int, low float64) {
-	this.theParameters[index].setLowerLimit(low)
+	this.theParameters[index].SetLowerLimit(low)
 }
 
 func (this *MnUserTransformation) removeLimits(index int) {
-	this.theParameters[index].removeLimits()
+	this.theParameters[index].RemoveLimits()
 }
 
 func (this *MnUserTransformation) value(index int) float64 {
-	return this.theParameters[index].value()
+	return this.theParameters[index].Value()
 }
 
 func (this *MnUserTransformation) error(index int) float64 {
-	return this.theParameters[index].error()
+	return this.theParameters[index].Error()
 }
 
 /** interaction via name of parameter */
@@ -259,18 +259,18 @@ func (this *MnUserTransformation) index(name string) int {
 
 /** convert external number into name of parameter */
 func (this *MnUserTransformation) name(index int) string {
-	return this.theParameters[index].name()
+	return this.theParameters[index].Name()
 }
 
 func (this *MnUserTransformation) int2ext(i int, val float64) float64 {
 	var parm *MinuitParameter = this.theParameters[this.theExtOfInt[i]]
-	if parm.hasLimits() {
-		if parm.hasUpperLimit() && parm.hasLowerLimit() {
-			return this.theDoubleLimTrafo.int2ext(val, parm.upperLimit(), parm.lowerLimit())
-		} else if parm.hasUpperLimit() && !parm.hasLowerLimit() {
-			return this.theUpperLimTrafo.int2ext(val, parm.upperLimit())
+	if parm.HasLimits() {
+		if parm.HasUpperLimit() && parm.HasLowerLimit() {
+			return this.theDoubleLimTrafo.int2ext(val, parm.UpperLimit(), parm.LowerLimit())
+		} else if parm.HasUpperLimit() && !parm.HasLowerLimit() {
+			return this.theUpperLimTrafo.int2ext(val, parm.UpperLimit())
 		} else {
-			return this.theLowerLimTrafo.int2ext(val, parm.lowerLimit())
+			return this.theLowerLimTrafo.int2ext(val, parm.LowerLimit())
 		}
 	}
 	return val
@@ -279,13 +279,13 @@ func (this *MnUserTransformation) int2ext(i int, val float64) float64 {
 func (this *MnUserTransformation) int2extError(i int, val, err float64) float64 {
 	dx := err
 	var parm *MinuitParameter = this.theParameters[this.theExtOfInt[i]]
-	if parm.hasLimits() {
+	if parm.HasLimits() {
 		var ui float64 = this.int2ext(i, val)
 		var du1 float64 = this.int2ext(i, val+dx) - ui
 		var du2 float64 = this.int2ext(i, val-dx) - ui
-		if parm.hasUpperLimit() && parm.hasLowerLimit() {
+		if parm.HasUpperLimit() && parm.HasLowerLimit() {
 			if dx > 1.0 {
-				du1 = parm.upperLimit() - parm.lowerLimit()
+				du1 = parm.UpperLimit() - parm.LowerLimit()
 			}
 			dx = 0.5 * (math.Abs(du1) + math.Abs(du2))
 		} else {
@@ -299,12 +299,12 @@ func (this *MnUserTransformation) int2extCovariance(vec *MnAlgebraicVector, cov 
 	var result *MnUserCovariance = NewMnUserCovariance(cov.nrow())
 	for i := 0; i < vec.size(); i++ {
 		var dxdi float64 = 1.0
-		if this.theParameters[this.theExtOfInt[i]].hasLimits() {
+		if this.theParameters[this.theExtOfInt[i]].HasLimits() {
 			dxdi = this.dInt2Ext(i, vec.get(i))
 		}
 		for j := i; j < vec.size(); j++ {
 			var dxdj float64 = 1.0
-			if this.theParameters[this.theExtOfInt[j]].hasLimits() {
+			if this.theParameters[this.theExtOfInt[j]].HasLimits() {
 				dxdj = this.dInt2Ext(j, vec.get(j))
 			}
 			result.set(i, j, dxdi*cov.get(i, j)*dxdj)
@@ -315,13 +315,13 @@ func (this *MnUserTransformation) int2extCovariance(vec *MnAlgebraicVector, cov 
 
 func (this *MnUserTransformation) ext2int(i int, val float64) float64 {
 	var parm *MinuitParameter = this.theParameters[i]
-	if parm.hasLimits() {
-		if parm.hasUpperLimit() && parm.hasLowerLimit() {
-			return this.theDoubleLimTrafo.ext2int(val, parm.upperLimit(), parm.lowerLimit(), precision())
-		} else if parm.hasUpperLimit() && !parm.hasLowerLimit() {
-			return this.theUpperLimTrafo.ext2int(val, parm.upperLimit(), precision())
+	if parm.HasLimits() {
+		if parm.HasUpperLimit() && parm.HasLowerLimit() {
+			return this.theDoubleLimTrafo.ext2int(val, parm.UpperLimit(), parm.LowerLimit(), precision())
+		} else if parm.HasUpperLimit() && !parm.HasLowerLimit() {
+			return this.theUpperLimTrafo.ext2int(val, parm.UpperLimit(), precision())
 		} else {
-			return this.theLowerLimTrafo.ext2int(val, parm.lowerLimit(), precision())
+			return this.theLowerLimTrafo.ext2int(val, parm.LowerLimit(), precision())
 		}
 	}
 	return val
@@ -330,13 +330,13 @@ func (this *MnUserTransformation) ext2int(i int, val float64) float64 {
 func (this *MnUserTransformation) dInt2Ext(i int, val float64) float64 {
 	var dd float64 = 1.0
 	var parm *MinuitParameter = this.theParameters[this.theExtOfInt[i]]
-	if parm.hasLimits() {
-		if parm.hasUpperLimit() && parm.hasLowerLimit() {
-			dd = this.theDoubleLimTrafo.dInt2Ext(val, parm.upperLimit(), parm.lowerLimit())
-		} else if parm.hasUpperLimit() && !parm.hasLowerLimit() {
-			dd = this.theUpperLimTrafo.dInt2Ext(val, parm.upperLimit())
+	if parm.HasLimits() {
+		if parm.HasUpperLimit() && parm.HasLowerLimit() {
+			dd = this.theDoubleLimTrafo.dInt2Ext(val, parm.UpperLimit(), parm.LowerLimit())
+		} else if parm.HasUpperLimit() && !parm.HasLowerLimit() {
+			dd = this.theUpperLimTrafo.dInt2Ext(val, parm.UpperLimit())
 		} else {
-			dd = this.theLowerLimTrafo.dInt2Ext(val, parm.lowerLimit())
+			dd = this.theLowerLimTrafo.dInt2Ext(val, parm.LowerLimit())
 		}
 	}
 	return dd
