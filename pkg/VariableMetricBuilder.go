@@ -109,7 +109,7 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc *GradientCalculator, s
 				}
 
 				e := this.errorUpdator().update(s0, p, g)
-				result = append(result, NewMinimumState(p, e, g, fcn.numOfCalls()))
+				result = append(result, NewMinimumStateWithGrad(p, e, g, edm, fcn.numOfCalls()))
 				edm *= 1.0 + 3.0*e.dcovar()
 				if edm > edmval && fcn.numOfCalls() < maxfcn {
 					break
