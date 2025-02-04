@@ -18,16 +18,17 @@ func NewVariableMetricBuilder() *VariableMetricBuilder {
 	}
 }
 
-func (this *VariableMetricBuilder) Minimum(fcn MnFcn, gc GradientCalculator, seed MinimumSeed, strategy MnStrategy, maxfcn int,
+func (this *VariableMetricBuilder) Minimum(fcn *MnFcn, gc *GradientCalculator, seed *MinimumSeed, strategy *MnStrategy,
+	maxfcn int,
 	edmval float64) (*FunctionMinimum, error) {
 	fmin, err := this.minimum(fcn, gc, seed, maxfcn, edmval)
 	if err != nil {
 		return nil, err
 	}
 
-	if strategy.strategy() == 2 || strategy.strategy() == 1 && fmin.error().dcovar() > 0.05 {
+	if strategy.strategy() == 2 || strategy.strategy() == 1 && fmin.Error().dcovar() > 0.05 {
 		st := NewMnHesse(strategy).calculate(fcn, fmin.state(), fmin.seed().trafo(), 0)
-		fmin.Add(st)
+		fmin.add(st)
 	}
 
 	if !fmin.IsValid() {
@@ -109,7 +110,7 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc *GradientCalculator, s
 				}
 
 				e := this.errorUpdator().update(s0, p, g)
-				result = append(result, NewMinimumState(p, e, g, fcn.numOfCalls()))
+				result = append(result, NewMinimumStateWithGrad(p, e, g, edm, fcn.numOfCalls()))
 				edm *= 1.0 + 3.0*e.dcovar()
 				if edm > edmval && fcn.numOfCalls() < maxfcn {
 					break
