@@ -410,3 +410,19 @@ func (asm *MnAlgebraicSymMatrix) mneigen(a []float64, ndima, n, mits int, work [
 	ifault = 0
 	return ifault
 }
+
+func (asm *MnAlgebraicSymMatrix) data() []float64 {
+	return asm.theData
+}
+
+func (asm *MnAlgebraicSymMatrix) size() int {
+	return asm.theSize
+}
+
+func (asm *MnAlgebraicSymMatrix) nrow() int {
+	return asm.theNRow
+}
+
+func (asm *MnAlgebraicSymMatrix) ncol() int {
+	return asm.nrow()
+}
