@@ -26,11 +26,11 @@ func (this *Numerical2PGradientCalculator) Gradient(par *MinimumParameters) (*Fu
 	if err != nil {
 		return nil, err
 	}
-	gwg, err := this.GradientWithGradient(par, gra)
+	gwg, err := this.GradientWithGrad(par, gra)
 	return gwg, err
 }
 
-func (this *Numerical2PGradientCalculator) GradientWithGradient(par *MinimumParameters,
+func (this *Numerical2PGradientCalculator) GradientWithGrad(par *MinimumParameters,
 	gradient *FunctionGradient) (*FunctionGradient, error) {
 	if !par.isValid() {
 		return nil, errors.New("parameters are invalid")

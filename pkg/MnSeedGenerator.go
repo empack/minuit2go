@@ -97,9 +97,15 @@ func (this *MnSeedGenerator) Generate(fcn *MnFcn, gc GradientCalculator, user *M
 	if NegativeG2LineSearch.hasNegativeG2(dgrad, prec) {
 		if _, ok := interface{}(gc).(AnalyticalGradientCalculator); ok {
 			var ngc *Numerical2PGradientCalculator = NewNumerical2PGradientCalculator(fcn, st.trafo(), stra)
-			state = NegativeG2LineSearch.search(fcn, state, ngc, prec)
+			state, err = NegativeG2LineSearch.search(fcn, state, ngc, prec)
+			if err != nil {
+				return nil, err
+			}
 		} else {
-			state = NegativeG2LineSearch.search(fcn, state, gc, prec)
+			state, err = NegativeG2LineSearch.search(fcn, state, gc, prec)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
