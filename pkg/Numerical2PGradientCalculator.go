@@ -85,7 +85,7 @@ func (this *Numerical2PGradientCalculator) GradientWithGradient(par *MinimumPara
 				}
 			}
 		}
-		
+
 		return NewFunctionGradientFromMnAlgebraicVectors(grd, g2, gstep), nil
 	}
 
