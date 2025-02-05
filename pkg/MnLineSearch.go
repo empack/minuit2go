@@ -80,10 +80,10 @@ func (this *mnLineSearchStruct) search(fcn *MnFcn, st *MinimumParameters, step *
 			slam = toler8
 		}
 		if slam < slamin {
-			return NewMnParabolaPoint(xvmin, fvmin)
+			return NewMnParabolaPoint(xvmin, fvmin), nil
 		}
 		if math.Abs(slam-1.) < toler8 && p1.y() < p0.y() {
-			return NewMnParabolaPoint(xvmin, fvmin)
+			return NewMnParabolaPoint(xvmin, fvmin), nil
 		}
 		if math.Abs(slam-1.) < toler8 {
 			slam = 1. + toler8
@@ -112,7 +112,7 @@ func (this *mnLineSearchStruct) search(fcn *MnFcn, st *MinimumParameters, step *
 
 	if niter >= maxiter {
 		// exhausted max number of iterations
-		return NewMnParabolaPoint(xvmin, fvmin)
+		return NewMnParabolaPoint(xvmin, fvmin), nil
 	}
 
 	var p2 *MnParabolaPoint = NewMnParabolaPoint(slam, F2)
@@ -155,7 +155,7 @@ func (this *mnLineSearchStruct) search(fcn *MnFcn, st *MinimumParameters, step *
 			if math.Abs(p0.x()-slam) < toler9 ||
 				math.Abs(p1.x()-slam) < toler9 ||
 				math.Abs(p2.x()-slam) < toler9 {
-				return NewMnParabolaPoint(xvmin, fvmin)
+				return NewMnParabolaPoint(xvmin, fvmin), nil
 			}
 			v_, err = MnUtils.AddV(st.vec(), MnUtils.MulV(step, slam))
 			if err != nil {
@@ -179,7 +179,7 @@ func (this *mnLineSearchStruct) search(fcn *MnFcn, st *MinimumParameters, step *
 
 		if niter >= maxiter {
 			// exhausted max number of iterations
-			return NewMnParabolaPoint(xvmin, fvmin)
+			return NewMnParabolaPoint(xvmin, fvmin), nil
 		}
 
 		// find worst previous point out of three and replace
@@ -206,5 +206,5 @@ func (this *mnLineSearchStruct) search(fcn *MnFcn, st *MinimumParameters, step *
 		niter++
 		ok = niter < maxiter
 	}
-	return NewMnParabolaPoint(xvmin, fvmin)
+	return NewMnParabolaPoint(xvmin, fvmin), nil
 }
