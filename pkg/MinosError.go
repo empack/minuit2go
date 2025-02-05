@@ -30,63 +30,63 @@ func (this *MinosError) Range() *Point {
 }
 
 func (this *MinosError) Lower() float64 {
-	return -1.0 * this.LowerState().Error(this.Parameter()) * (1.0 + this.theLower.Value())
+	return -1.0 * this.LowerState().Error(this.Parameter()) * (1.0 + this.theLower.value())
 }
 
 func (this *MinosError) Upper() float64 {
-	return this.UpperState().Error(this.Paramter()) * (1.0 + this.theUpper.Value())
+	return this.UpperState().Error(this.Parameter()) * (1.0 + this.theUpper.value())
 }
 
-func (this *MinosError) Paramter() int {
+func (this *MinosError) Parameter() int {
 	return this.theParameter
 }
 
 func (this *MinosError) LowerState() *MnUserParameterState {
-	return this.theLower.State()
+	return this.theLower.state()
 }
 
 func (this *MinosError) UpperState() *MnUserParameterState {
-	return this.theUpper.State()
+	return this.theUpper.state()
 }
 
 func (this *MinosError) IsValid() bool {
-	return this.theLower.IsValid() && this.theUpper.IsValid()
+	return this.theLower.isValid() && this.theUpper.isValid()
 }
 
 func (this *MinosError) LowerValid() bool {
-	return this.theLower.IsValid()
+	return this.theLower.isValid()
 }
 
 func (this *MinosError) UpperValid() bool {
-	return this.theUpper.IsValid()
+	return this.theUpper.isValid()
 }
 
 func (this *MinosError) AtLowerLimit() bool {
-	return this.theLower.AtLimit()
+	return this.theLower.atLimit()
 }
 
 func (this *MinosError) AtUpperLimit() bool {
-	return this.theUpper.AtLimit()
+	return this.theUpper.atLimit()
 }
 
 func (this *MinosError) AtLowerMaxFcn() bool {
-	return this.theLower.AtMaxFcn()
+	return this.theLower.atMaxFcn()
 }
 
 func (this *MinosError) AtUpperMaxFcn() bool {
-	return this.theUpper.AtMaxFcn()
+	return this.theUpper.atMaxFcn()
 }
 
 func (this *MinosError) LowerNewMin() bool {
-	return this.theLower.NewMinimum()
+	return this.theLower.newMinimum()
 }
 
 func (this *MinosError) UpperNewMin() bool {
-	return this.theUpper.NewMinimum()
+	return this.theUpper.newMinimum()
 }
 
 func (this *MinosError) Nfcn() int {
-	return this.theUpper.Nfcn() + this.theLower.Nfcn()
+	return this.theUpper.nfcn() + this.theLower.nfcn()
 }
 
 func (this *MinosError) Min() float64 {
