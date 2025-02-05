@@ -1,7 +1,5 @@
 package minuit
 
-import "reflect"
-
 type MnSeedGenerator struct {
 }
 
