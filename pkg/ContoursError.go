@@ -25,11 +25,11 @@ func (this *ContoursError) Points() []*Point {
 }
 
 func (this *ContoursError) XRange() *Point {
-	return this.theXMinos.range()
+	return this.theXMinos.Range()
 }
 
 func (this *ContoursError) YRange() *Point {
-	return this.theYMinos.range()
+	return this.theYMinos.Range()
 }
 
 func (this *ContoursError) Xpar() int {
@@ -53,9 +53,9 @@ func (this *ContoursError) Nfcn() int {
 }
 
 func (this *ContoursError) Xmin() float64 {
-	return this.theXMinos.min()
+	return this.theXMinos.Min()
 }
 
 func (this *ContoursError) Ymin() float64 {
-	return this.theYMinos.min()
+	return this.theYMinos.Min()
 }
