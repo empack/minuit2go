@@ -13,7 +13,7 @@ func NewCombinedMinimizer() *CombinedMinimizer {
 	}
 }
 
-func (this *CombinedMinimizer) SeedGenerator() *MinimumSeedGenerator {
+func (this *CombinedMinimizer) SeedGenerator() MinimumSeedGenerator {
 	return this.theMinSeedGen
 }
 func (this *CombinedMinimizer) Builder() MinimumBuilder {
