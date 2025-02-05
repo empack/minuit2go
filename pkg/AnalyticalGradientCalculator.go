@@ -16,6 +16,9 @@ func NewAnalyticalGradientCalculator(fcn FCNGradientBase, state *MnUserTransform
 	}
 }
 
+func (this *AnalyticalGradientCalculator) GradientWithGrad(par *MinimumParameters, grad *FunctionGradient) (*FunctionGradient, error) {
+	panic("implement me")
+}
 func (this *AnalyticalGradientCalculator) Gradient(par *MinimumParameters) (*FunctionGradient, error) {
 	var grad []float64 = this.theGradCalc.Gradient(this.theTransformation.transform(par.vec()).data)
 	if len(grad) != len(this.theTransformation.parameters()) {

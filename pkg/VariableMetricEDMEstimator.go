@@ -7,7 +7,7 @@ func NewVariableMetricEDMEstimator() *VariableMetricEDMEstimator {
 	return &VariableMetricEDMEstimator{}
 }
 
-func (vme *VariableMetricEDMEstimator) estimate(g FunctionGradient, e MinimumError) (float64, error) {
+func (vme *VariableMetricEDMEstimator) estimate(g *FunctionGradient, e *MinimumError) (float64, error) {
 	if e.invHessian().size() == 1 {
 		ih, err := e.invHessian().get(0, 0)
 		if err != nil {
