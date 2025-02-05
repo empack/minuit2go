@@ -1,8 +1,6 @@
 package minuit
 
-var ContoursError = &ContoursErrorStruct{}
-
-type ContoursErrorStruct struct {
+type ContoursError struct {
 	theParX   int
 	theParY   int
 	thePoints []*Point
@@ -11,8 +9,8 @@ type ContoursErrorStruct struct {
 	theNFcn   int
 }
 
-func NewContoursError(parx, pary int, points []*Point, xmnos, ymnos *MinosError, nfcn int) *ContoursErrorStruct {
-	return &ContoursErrorStruct{
+func NewContoursError(parx, pary int, points []*Point, xmnos, ymnos *MinosError, nfcn int) *ContoursError {
+	return &ContoursError{
 		theParX:   parx,
 		theParY:   pary,
 		thePoints: points,
@@ -22,42 +20,42 @@ func NewContoursError(parx, pary int, points []*Point, xmnos, ymnos *MinosError,
 	}
 }
 
-func (this *ContoursErrorStruct) Points() []*Point {
+func (this *ContoursError) Points() []*Point {
 	return this.thePoints
 }
 
-func (this *ContoursErrorStruct) XRange() *Point {
+func (this *ContoursError) XRange() *Point {
 	return this.theXMinos.range()
 }
 
-func (this *ContoursErrorStruct) YRange() *Point {
+func (this *ContoursError) YRange() *Point {
 	return this.theYMinos.range()
 }
 
-func (this *ContoursErrorStruct) Xpar() int {
+func (this *ContoursError) Xpar() int {
 	return this.theParX
 }
 
-func (this *ContoursErrorStruct) YPar() int {
+func (this *ContoursError) YPar() int {
 	return this.theParY
 }
 
-func (this *ContoursErrorStruct) XMinosError() *MinosError {
+func (this *ContoursError) XMinosError() *MinosError {
 	return this.theXMinos
 }
 
-func (this *ContoursErrorStruct) YMinosError() *MinosError {
+func (this *ContoursError) YMinosError() *MinosError {
 	return this.theYMinos
 }
 
-func (this *ContoursErrorStruct) Nfcn() int {
+func (this *ContoursError) Nfcn() int {
 	return this.theNFcn
 }
 
-func (this *ContoursErrorStruct) Xmin() float64 {
+func (this *ContoursError) Xmin() float64 {
 	return this.theXMinos.min()
 }
 
-func (this *ContoursErrorStruct) Ymin() float64 {
+func (this *ContoursError) Ymin() float64 {
 	return this.theYMinos.min()
 }
