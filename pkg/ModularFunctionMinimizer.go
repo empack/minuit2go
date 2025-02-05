@@ -10,14 +10,17 @@ func (this *ModularFunctionMinimizer) minimizeWithError(fcn FCNBase, st *MnUserP
 	if _, ok := interface{}(fcn).(FCNGradientBase); ok && useAnalyticalGradient {
 		gc = NewAnalyticalGradientCalculator(fcn.(FCNGradientBase), st.trafo(), checkGradient)
 	} else {
-		gc = NewNumerical2PGradientCalculator(mfcn, st.trafo(), strategy)
+		gc = NewNumerical2PGradientCalculator(mfcn.ParentClass, st.trafo(), strategy)
 	}
 
 	var npar int = st.variableParameters()
 	if maxfcn == 0 {
 		maxfcn = 200 + 100*npar + 5*npar*npar
 	}
-	var mnseeds *MinimumSeed = this.SeedGenerator().Generate(mfcn.ParentClass, gc, st, strategy)
+	mnseeds, err := this.SeedGenerator().Generate(mfcn.ParentClass, gc, st, strategy)
+	if err != nil {
+		return nil, err
+	}
 
 	return this.minimize(mfcn.ParentClass, gc, mnseeds, strategy, maxfcn, toler)
 }
