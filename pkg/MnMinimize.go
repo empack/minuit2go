@@ -19,7 +19,7 @@ func NewMnMinimize(fcn FCNBase, par, err []float64) *MnMinimize {
 
 /** construct from FCNBase + double[] for parameters and errors */
 func NewMnMinimizeWithParErrStra(fcn FCNBase, par, err []float64, stra int) *MnMinimize {
-	return NewMnMinimizeWithParameterStateStrategy(fcn, UserParamStateFromParamAndErrValues(par, err), NewMnStrategyWithStra(stra))
+	return NewMnMinimizeWithParameterStateStrategy(fcn, NewUserParamStateFromParamAndErrValues(par, err), NewMnStrategyWithStra(stra))
 }
 
 /** construct from FCNBase + double[] for parameters and MnUserCovariance with default strategy */
@@ -29,7 +29,7 @@ func NewMnMinimizeWithParCovariance(fcn FCNBase, par []float64, cov *MnUserCovar
 
 /** construct from FCNBase + double[] for parameters and MnUserCovariance */
 func NewMnMinimizeWithParCovarianceStra(fcn FCNBase, par []float64, cov *MnUserCovariance, stra int) *MnMinimize {
-	ups, _ := UserParamStateFromUserParamCovariance(par, cov)
+	ups, _ := NewUserParamStateFromUserParamCovariance(par, cov)
 	return NewMnMinimizeWithParameterStateStrategy(fcn, ups, NewMnStrategyWithStra(stra))
 }
 
@@ -40,7 +40,7 @@ func NewMnMinimizeWithParameters(fcn FCNBase, par *MnUserParameters) *MnMinimize
 
 /** construct from FCNBase + MnUserParameters */
 func NewMnMinimizeWithParametersStra(fcn FCNBase, par *MnUserParameters, stra int) *MnMinimize {
-	return NewMnMinimizeWithParameterStateStrategy(fcn, UserParameterStateFromUserParameter(par), NewMnStrategyWithStra(stra))
+	return NewMnMinimizeWithParameterStateStrategy(fcn, NewUserParameterStateFromUserParameter(par), NewMnStrategyWithStra(stra))
 }
 
 /** construct from FCNBase + MnUserParameters + MnUserCovariance with default strategy */
@@ -50,7 +50,7 @@ func NewMnMinimizeWithParametersCovariance(fcn FCNBase, par *MnUserParameters, c
 
 /** construct from FCNBase + MnUserParameters + MnUserCovariance */
 func NewMnMinimizeWithParametersCovarianceStra(fcn FCNBase, par *MnUserParameters, cov *MnUserCovariance, stra int) *MnMinimize {
-	ups, _ := UserParamStateFromUserParamCovariance(par, cov)
+	ups, _ := NewUserParamStateFromUserParamCovariance(par, cov)
 	return NewMnMinimizeWithParameterStateStrategy(fcn, ups, NewMnStrategyWithStra(stra))
 }
 

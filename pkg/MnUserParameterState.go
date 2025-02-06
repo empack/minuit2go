@@ -121,7 +121,7 @@ func copyMnUserParameterState(other *MnUserParameterState) *MnUserParameterState
 // 	}
 
 /** construct from user parameters (before minimization) */
-func UserParamStateFromParamAndErrValues(par []float64, err []float64) *MnUserParameterState {
+func NewUserParamStateFromParamAndErrValues(par []float64, err []float64) *MnUserParameterState {
 	ups := &MnUserParameterState{
 		theValid:         true,
 		theParameters:    NewMnUserParametersWithParErr(par, err),
@@ -153,7 +153,7 @@ func UserParamStateFromParamAndErrValues(par []float64, err []float64) *MnUserPa
 //			 theIntParameters.add(ipar.value());
 //	   }
 //	}
-func UserParameterStateFromUserParameter(par *MnUserParameters) *MnUserParameterState {
+func NewUserParameterStateFromUserParameter(par *MnUserParameters) *MnUserParameterState {
 
 	ups := &MnUserParameterState{
 		theValid:         true,
@@ -245,7 +245,7 @@ func NewMnUserParameterStateFlFlIn(par []float64, cov []float64, nrow int) (*MnU
 //	   }
 //	   theParameters = new MnUserParameters(par, err);
 //	}
-func MnUserParameterStateFlUc(par []float64, cov *MnUserCovariance) (*MnUserParameterState, error) {
+func NewMnUserParameterStateFlUc(par []float64, cov *MnUserCovariance) (*MnUserParameterState, error) {
 
 	ups := &MnUserParameterState{
 		theValid:           true,
@@ -293,7 +293,7 @@ func MnUserParameterStateFlUc(par []float64, cov *MnUserCovariance) (*MnUserPara
 //	   }
 //	   assert(theCovariance.nrow() == variableParameters());
 //	}
-func UserParamStateFromUserParamCovariance(par *MnUserParameters, cov *MnUserCovariance) (*MnUserParameterState, error) {
+func NewUserParamStateFromUserParamCovariance(par *MnUserParameters, cov *MnUserCovariance) (*MnUserParameterState, error) {
 	ups := &MnUserParameterState{
 		theValid:           true,
 		theCovarianceValid: true,
