@@ -167,6 +167,6 @@ func (this *FunctionMinimum) isAboveMaxEdm() bool {
 	return this.theAboveMaxEdm
 }
 
-func (this *FunctionMinimum) hasReachCallLimit() bool {
+func (this *FunctionMinimum) hasReachedCallLimit() bool {
 	return this.theReachedCallLimit
 }

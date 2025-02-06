@@ -46,7 +46,7 @@ func NewMnCrossWithValueStateNfcn(value float64, state *MnUserParameterState, nf
 	}
 }
 
-func NewMnCrossWithStateNfcnLimset(state *MnUserParameterState, nfcn int) *MnCross {
+func NewMnCrossParLimit(state *MnUserParameterState, nfcn int) *MnCross {
 	return &MnCross{
 		theValue:  0,
 		theState:  state,
@@ -58,7 +58,7 @@ func NewMnCrossWithStateNfcnLimset(state *MnUserParameterState, nfcn int) *MnCro
 	}
 }
 
-func NewMnCrossWithStateNfcnMaxNfcn(state *MnUserParameterState, nfcn int) *MnCross {
+func NewMnCrossFcnLimit(state *MnUserParameterState, nfcn int) *MnCross {
 	return &MnCross{
 		theValue:  0,
 		theState:  state,
@@ -70,7 +70,7 @@ func NewMnCrossWithStateNfcnMaxNfcn(state *MnUserParameterState, nfcn int) *MnCr
 	}
 }
 
-func NewMnCrossWithStateNfcnNewMin(state *MnUserParameterState, nfcn int) *MnCross {
+func NewMnCrossNewMin(state *MnUserParameterState, nfcn int) *MnCross {
 	return &MnCross{
 		theValue:  0,
 		theState:  state,
