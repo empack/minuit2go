@@ -75,7 +75,6 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 	var nfcn int = 0
 
 	var result []*Point = make([]*Point, 0, npoints)
-	var states []*MnUserParameterState = make([]*MnUserParameterState, 0) //TODO remove when not used
 	var toler float64 = 0.05
 
 	//get first four points
@@ -100,7 +99,7 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 	}
 	var ey *Point = mey.Range()
 
-	var migrad *MnMigrad = NewMnMigrad(this.theFCN, this.theMinimum.UserState().clone(), NewMnStrategyWithStra(max(0, this.theStrategy.Strategy()-1)))
+	var migrad *MnMigrad = NewMnMigradWithParameterStateStrategy(this.theFCN, this.theMinimum.UserState().clone(), NewMnStrategyWithStra(max(0, this.theStrategy.Strategy()-1)))
 
 	migrad.Fix(px)
 	migrad.SetValue(px, valx+ex.second)
@@ -119,7 +118,7 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 		return NewContoursError(px, py, result, mex, mey, nfcn), nil
 	}
 
-	var migrad1 *MnMigrad = NewMnMigrad(this.theFCN, this.theMinimum.UserState().clone(), NewMnStrategyWithStra(max(0, this.theStrategy.Strategy()-1)))
+	var migrad1 *MnMigrad = NewMnMigradWithParameterStateStrategy(this.theFCN, this.theMinimum.UserState().clone(), NewMnStrategyWithStra(max(0, this.theStrategy.Strategy()-1)))
 	migrad1.Fix(py)
 	migrad1.SetValue(py, valy+ey.second)
 	eyx_up, _ := migrad1.Minimize()
@@ -193,7 +192,10 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 			var pmid []float64 = []float64{xmidcr, ymidcr}
 			var pdir []float64 = []float64{xdircr, ydircr}
 
-			var opt *MnCross = cross.cross(par, pmid, pdir, toler, maxcalls)
+			opt, err := cross.cross(par, pmid, pdir, toler, maxcalls)
+			if err != nil {
+				return nil, err
+			}
 			nfcn += opt.nfcn()
 			if opt.isValid() {
 				var aopt float64 = opt.value()
