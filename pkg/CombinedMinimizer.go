@@ -1,7 +1,7 @@
 package minuit
 
 type CombinedMinimizer struct {
-	ModularFunctionMinimizer
+	*ModularFunctionMinimizer
 	theMinSeedGen *MnSeedGenerator
 	theMinBuilder *CombinedMinimumBuilder
 }
