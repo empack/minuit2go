@@ -2,10 +2,11 @@ package example
 
 import (
 	"fmt"
-	minuit "github.com/empack/minuit2go/pkg"
 	"math"
 	"slices"
 	"testing"
+
+	minuit "github.com/empack/minuit2go/pkg"
 )
 
 type ReneFcn struct {
@@ -64,15 +65,15 @@ func TestRene(t *testing.T) {
 
 	var theFCN *ReneFcn = NewReneFcn(measurements)
 
-	var upar *MnUserParameters = NewMnUserParameters()
-	upar.Add("p0", 100., 10.)
-	upar.Add("p1", 100., 10.)
-	upar.Add("p2", 100., 10.)
-	upar.Add("p3", 100., 10.)
-	upar.Add("p4", 1., 0.3)
-	upar.Add("p5", 1., 0.3)
+	var upar *minuit.MnUserParameters = minuit.NewEmptyMnUserParameters()
+	upar.AddFree("p0", 100., 10.)
+	upar.AddFree("p1", 100., 10.)
+	upar.AddFree("p2", 100., 10.)
+	upar.AddFree("p3", 100., 10.)
+	upar.AddFree("p4", 1., 0.3)
+	upar.AddFree("p5", 1., 0.3)
 
-	fmt.Printf("Initial parameters: %s\n", upar.ToString())
+	fmt.Printf("Initial parameters: %s\n", upar.String())
 
 	println("start migrad")
 	var migrad *minuit.MnMigrad = minuit.NewMnMigradWithParameters(theFCN, upar)
@@ -96,26 +97,26 @@ func TestRene(t *testing.T) {
 		var params []float64 = []float64{1, 1, 1, 1, 1, 1}
 		var error []float64 = []float64{1, 1, 1, 1, 1, 1}
 		var scan *minuit.MnScan = minuit.NewMnScan(theFCN, params, error)
-		fmt.Printf("scan parameters: %s\n", scan.Parameters().ToString())
+		fmt.Printf("scan parameters: %s\n", scan.Parameters())
 		var plot *minuit.MnPlot = minuit.NewMnPlot()
 		for i := 0; i < upar.VariableParameters(); i++ {
 			var xy []*minuit.Point = scan.Scan(i)
 			plot.Plot(xy)
 		}
-		fmt.Printf("scan parameters: %s\n", scan.Parameters().ToString())
+		fmt.Printf("scan parameters: %s\n", scan.Parameters())
 	}
 
 	{
 		var params []float64 = []float64{1, 1, 1, 1, 1, 1}
 		var error []float64 = []float64{1, 1, 1, 1, 1, 1}
 		var scan *minuit.MnScan = minuit.NewMnScan(theFCN, params, error)
-		fmt.Printf("scan parameters: %s\n", scan.Parameters().ToString())
+		fmt.Printf("scan parameters: %s\n", scan.Parameters())
 		min2, err := scan.Minimize()
 		if err != nil {
 			t.Fatalf("minimize failed with:\n %s\n", err.Error())
 		}
 		//     std::cout<<min<<std::endl;
 		fmt.Printf("%v\n", min2)
-		fmt.Printf("scan parameters: %s\n", scan.Parameters().ToString())
+		fmt.Printf("scan parameters: %s\n", scan.Parameters())
 	}
 }
