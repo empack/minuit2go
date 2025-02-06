@@ -426,3 +426,5 @@ func (this *MnAlgebraicSymMatrix) nrow() int {
 func (this *MnAlgebraicSymMatrix) ncol() int {
 	return this.nrow()
 }
+
+func (this *MnAlgebraicSymMatrix) String() string { return MnPrint.toStringAlgebraicSymMatrix(this) }

@@ -33,6 +33,4 @@ func (this *MnAlgebraicVector) set(i int, value float64) {
 func (this *MnAlgebraicVector) asArray() []float64 {
 	return this.data
 }
-func (this *MnAlgebraicVector) ToString() string {
-	return MnPrint.toMnAlgebraicVectorString(this)
-}
+func (this *MnAlgebraicVector) String() string { return MnPrint.toStringAlgebraicVector(this) }
