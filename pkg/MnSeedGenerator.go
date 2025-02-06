@@ -9,6 +9,10 @@ import (
 type MnSeedGenerator struct {
 }
 
+func NewMnSeedGenerator() *MnSeedGenerator {
+	return &MnSeedGenerator{}
+}
+
 func (this *MnSeedGenerator) Generate(fcn *MnFcn, gc GradientCalculator, user *MnUserParameterState, stra *MnStrategy) (*MinimumSeed, error) {
 	var n int = st.variableParameters()
 	var prec *MnMachinePrecision = st.precision()
