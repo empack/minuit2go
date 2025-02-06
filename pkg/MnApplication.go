@@ -60,7 +60,7 @@ func (this *MnApplication) MinimizeWithMaxfcnToler(maxfcn int, toler float64) (*
 			maxfcn = 200 + 100*npar + 5*npar*npar
 		}
 
-		min := this.minimizer().minimize(this.theFCN, this.theState, this.theStrategy, maxfcn, toler,
+		min := this.Minimizer().minimize(this.theFCN, this.theState, this.theStrategy, maxfcn, toler,
 			this.theErrorDef, this.useAnalyticalDerivatives, this.checkAnalyticalDerivatives)
 		this.theNumCall += min.nfcn()
 		this.theState = min.UserState()
@@ -68,7 +68,7 @@ func (this *MnApplication) MinimizeWithMaxfcnToler(maxfcn int, toler float64) (*
 	}
 }
 
-func (this *MnApplication) minimizer() *ModularFunctionMinimizer {
+func (this *MnApplication) Minimizer() *ModularFunctionMinimizer {
 	// TODO: MnApplication.class:63 this is an abstract function so..
 	return nil
 }

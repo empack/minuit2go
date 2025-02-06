@@ -1,7 +1,7 @@
 package minuit
 
 type SimplexMinimizer struct {
-	ModularFunctionMinimizer
+	*ModularFunctionMinimizer
 	theSeedGenerator *SimplexSeedGenerator
 	theBuilder       *SimplexBuilder
 }

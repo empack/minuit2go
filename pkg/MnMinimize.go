@@ -60,6 +60,6 @@ func NewMnMinimizeWithParameterStateStrategy(fcn FCNBase, par *MnUserParameterSt
 	}
 }
 
-func (this *MnMinimize) minimizer() *ModularFunctionMinimizer {
+func (this *MnMinimize) Minimizer() *ModularFunctionMinimizer {
 	return this.theMinimizer.ModularFunctionMinimizer
 }
