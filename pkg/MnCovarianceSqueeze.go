@@ -64,7 +64,10 @@ func (this *mnCovarianceSqueezeStruct) Squeeze(cov *MnUserCovariance, n int) (*M
 }
 
 func (this *mnCovarianceSqueezeStruct) squeeze(err *MinimumError, n int) (*MinimumError, error) {
-	var hess *MnAlgebraicSymMatrix = err.hessian()
+	hess, fnErr := err.hessian()
+	if fnErr != nil {
+		return nil, fnErr
+	}
 	squeezed, fnErr := this.SqueezeSymMatrix(hess, n)
 	if fnErr != nil {
 		return nil, fnErr
