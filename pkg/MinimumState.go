@@ -8,12 +8,16 @@ type MinimumState struct {
 	theNFcn       int
 }
 
-func NewMinimumStateFromNumber(n int) *MinimumState {
+func NewMinimumStateFromNumber(n int) (*MinimumState, error) {
+	e, err := NewMinimumErrorFromNumber(n)
+	if err != nil {
+		return nil, err
+	}
 	return &MinimumState{
 		theParameters: NewMinimumParametersFromNumber(n),
-		theError:      NewMinimumErrorFromNumber(n),
+		theError:      e,
 		theGradient:   NewFunctionGradientFromNumber(n),
-	}
+	}, nil
 }
 
 func NewMinimumStateWithGrad(states *MinimumParameters, err *MinimumError, grad *FunctionGradient, edm float64, nfcn int) *MinimumState {
@@ -26,14 +30,18 @@ func NewMinimumStateWithGrad(states *MinimumParameters, err *MinimumError, grad 
 	}
 }
 
-func NewMinimumState(states *MinimumParameters, edm float64, nfcn int) *MinimumState {
+func NewMinimumState(states *MinimumParameters, edm float64, nfcn int) (*MinimumState, error) {
+	e, err := NewMinimumErrorFromNumber(states.vec().size())
+	if err != nil {
+		return nil, err
+	}
 	return &MinimumState{
 		theParameters: states,
-		theError:      NewMinimumErrorFromNumber(states.vec().size()),
+		theError:      e,
 		theGradient:   NewFunctionGradientFromNumber(states.vec().size()),
 		theEDM:        edm,
 		theNFcn:       nfcn,
-	}
+	}, nil
 }
 
 func (this *MinimumState) parameters() *MinimumParameters {
