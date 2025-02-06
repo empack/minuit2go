@@ -23,7 +23,7 @@ func NewMnFunctionCross(fcn FCNBase, state *MnUserParameterState, fval float64, 
 	}
 }
 
-func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tlr float64, maxcalls int) *MnCross {
+func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tlr float64, maxcalls int) (*MnCross, error) {
 	var npar int = len(par)
 	var nfcn int = 0
 	var prec *MnMachinePrecision = this.theState.Precision()
@@ -65,7 +65,7 @@ func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tl
 		limset = true
 	}
 
-	var migrad *MnMigrad = NewMnMigrad(this.theFCN, this.theState, NewMnStrategyWithStra(max(0, this.theStrategy.Strategy()-1)))
+	var migrad *MnMigrad = NewMnMigradWithParameterStateStrategy(this.theFCN, this.theState, NewMnStrategyWithStra(max(0, this.theStrategy.Strategy()-1)))
 
 	for i := 0; i < npar; i++ {
 		migrad.SetValue(par[i], pmid[i])
@@ -75,14 +75,14 @@ func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tl
 	nfcn += min0.Nfcn()
 
 	if min0.hasReachedCallLimit() {
-		return NewMnCrossFcnLimit(min0.UserState(), nfcn)
+		return NewMnCrossFcnLimit(min0.UserState(), nfcn), nil
 	}
 
 	if !min0.IsValid() {
-		return NewMnCrossWithNfcn(nfcn)
+		return NewMnCrossWithNfcn(nfcn), nil
 	}
 	if limset == true && min0.Fval() < aim {
-		return NewMnCrossParLimit(min0.UserState(), nfcn)
+		return NewMnCrossParLimit(min0.UserState(), nfcn), nil
 	}
 	ipt++
 	alsb[0] = 0.
@@ -90,7 +90,7 @@ func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tl
 	flsb[0] = math.Max(flsb[0], aminsv+0.1*up)
 	aopt = math.Sqrt(up/(flsb[0]-aminsv)) - 1.
 	if math.Abs(flsb[0]-aim) < tlf {
-		return NewMnCrossWithValueStateNfcn(aopt, min0.UserState(), nfcn)
+		return NewMnCrossWithValueStateNfcn(aopt, min0.UserState(), nfcn), nil
 	}
 
 	if aopt > 1.0 {
@@ -113,13 +113,13 @@ func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tl
 	nfcn += min1.Nfcn()
 
 	if min1.hasReachedCallLimit() {
-		return NewMnCrossFcnLimit(min1.UserState(), nfcn)
+		return NewMnCrossFcnLimit(min1.UserState(), nfcn), nil
 	}
 	if !min1.IsValid() {
-		return NewMnCrossWithNfcn(nfcn)
+		return NewMnCrossWithNfcn(nfcn), nil
 	}
 	if limset == true && min1.Fval() < aim {
-		return NewMnCrossParLimit(min1.UserState(), nfcn)
+		return NewMnCrossParLimit(min1.UserState(), nfcn), nil
 	}
 
 	ipt++
@@ -154,13 +154,13 @@ L300:
 				nfcn += min1.Nfcn()
 
 				if min1.hasReachedCallLimit() {
-					return NewMnCrossFcnLimit(min1.UserState(), nfcn)
+					return NewMnCrossFcnLimit(min1.UserState(), nfcn), nil
 				}
 				if !min1.IsValid() {
-					return NewMnCrossWithNfcn(nfcn)
+					return NewMnCrossWithNfcn(nfcn), nil
 				}
 				if limset == true && min1.Fval() < aim {
-					return NewMnCrossParLimit(min1.UserState(), nfcn)
+					return NewMnCrossParLimit(min1.UserState(), nfcn), nil
 				}
 
 				ipt++
@@ -172,12 +172,11 @@ L300:
 				}
 			}
 			if ipt > maxitr {
-				return NewMnCrossWithNfcn(nfcn)
+				return NewMnCrossWithNfcn(nfcn), nil
 			}
 
 		}
 
-	L460:
 		for {
 			aopt = alsb[1] + (aim-flsb[1])/dfda
 			var fdist float64 = math.Min(math.Abs(aim-flsb[0]), math.Abs(aim-flsb[1]))
@@ -187,10 +186,10 @@ L300:
 				tla = tlr * math.Abs(aopt)
 			}
 			if adist < tla && fdist < tlf {
-				return NewMnCrossWithValueStateNfcn(aopt, min1.UserState(), nfcn)
+				return NewMnCrossWithValueStateNfcn(aopt, min1.UserState(), nfcn), nil
 			}
 			if ipt > maxitr {
-				return NewMnCrossWithNfcn(nfcn)
+				return NewMnCrossWithNfcn(nfcn), nil
 			}
 			var bmin float64 = math.Min(alsb[0], alsb[1]) - 1.0
 			if aopt < bmin {
@@ -214,14 +213,14 @@ L300:
 			nfcn += min2.Nfcn()
 
 			if min2.hasReachedCallLimit() {
-				return NewMnCrossFcnLimit(min2.UserState(), nfcn)
+				return NewMnCrossFcnLimit(min2.UserState(), nfcn), nil
 			}
 
 			if !min2.IsValid() {
-				return NewMnCrossWithNfcn(nfcn)
+				return NewMnCrossWithNfcn(nfcn), nil
 			}
 			if limset == true && min2.Fval() < aim {
-				return NewMnCrossParLimit(min2.UserState(), nfcn)
+				return NewMnCrossParLimit(min2.UserState(), nfcn), nil
 			}
 
 			ipt++
@@ -253,7 +252,7 @@ L300:
 				break L300
 			}
 			if noless == 0 && ibest != 2 {
-				return NewMnCrossWithNfcn(nfcn)
+				return NewMnCrossWithNfcn(nfcn), nil
 			}
 			if noless == 3 && ibest != 2 {
 				alsb[1] = alsb[2]
@@ -275,7 +274,7 @@ L300:
 		var coeff3 float64 = parbol.a()
 		var determ float64 = coeff2*coeff2 - 4.*coeff3*(coeff1-aim)
 		if determ < prec.eps() {
-			return NewMnCrossWithNfcn(nfcn)
+			return NewMnCrossWithNfcn(nfcn), nil
 		}
 		var rt float64 = math.Sqrt(determ)
 		var x1 float64 = (-coeff2 + rt) / (2. * coeff3)
@@ -298,7 +297,7 @@ L300:
 			tla = tlr * math.Abs(aopt)
 		}
 		if math.Abs(aopt-alsb[ibest]) < tla && math.Abs(flsb[ibest]-aim) < tlf {
-			return NewMnCrossWithValueStateNfcn(aopt, min2.UserState(), nfcn)
+			return NewMnCrossWithValueStateNfcn(aopt, min2.UserState(), nfcn), nil
 		}
 
 		var ileft int = 3
@@ -363,17 +362,20 @@ L300:
 		for i := 0; i < npar; i++ {
 			migrad.SetValue(par[i], pmid[i]+(aopt)*pdir[i])
 		}
-		min2 = migrad.minimize(maxcalls, tlr)
+		min2, err := migrad.MinimizeWithMaxfcnToler(maxcalls, tlr)
+		if err != nil {
+			return nil, err
+		}
 		nfcn += min2.Nfcn()
 
 		if min2.hasReachedCallLimit() {
-			return NewMnCrossFcnLimit(min2.UserState(), nfcn)
+			return NewMnCrossFcnLimit(min2.UserState(), nfcn), nil
 		}
 		if !min2.IsValid() {
-			return NewMnCrossWithNfcn(nfcn)
+			return NewMnCrossWithNfcn(nfcn), nil
 		}
 		if limset == true && min2.Fval() < aim {
-			return NewMnCrossParLimit(min2.UserState(), nfcn)
+			return NewMnCrossParLimit(min2.UserState(), nfcn), nil
 		}
 
 		ipt++
@@ -383,5 +385,5 @@ L300:
 		ok = ipt < maxitr
 	}
 
-	return NewMnCrossWithNfcn(nfcn)
+	return NewMnCrossWithNfcn(nfcn), nil
 }
