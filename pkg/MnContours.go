@@ -68,8 +68,8 @@ func (this *MnContours) ContourWithError(px, py int, errDef float64) (*ContoursE
  */
 func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints int) (*ContoursError, error) {
 	errDef *= this.theMinimum.ErrorDef()
-	if npoints > 3 {
-		return nil, errors.New("assertion violation")
+	if npoints <= 3 {
+		return nil, errors.New("assertion violation: number of points must be greater than 3")
 	}
 	var maxcalls int = 100 * (npoints + 5) * (this.theMinimum.UserState().variableParameters() + 1)
 	var nfcn int = 0
@@ -79,7 +79,7 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 	var toler float64 = 0.05
 
 	//get first four points
-	var minos *MnMinos = NewMnMinos(this.theFCN, this.theMinimum, this.theStrategy)
+	var minos *MnMinos = NewMnMinosWithFunctionMinimumStrategy(this.theFCN, this.theMinimum, this.theStrategy)
 
 	var valx float64 = this.theMinimum.UserState().value(px)
 	var valy float64 = this.theMinimum.UserState().value(py)

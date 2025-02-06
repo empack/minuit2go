@@ -10,11 +10,11 @@ var MnCovarianceSqueeze = &mnCovarianceSqueezeStruct{}
 type mnCovarianceSqueezeStruct struct{}
 
 func (this *mnCovarianceSqueezeStruct) Squeeze(cov *MnUserCovariance, n int) (*MnUserCovariance, error) {
-	if cov.Nrow() > 0 {
-		return nil, errors.New("assertion violation")
+	if cov.Nrow() <= 0 {
+		return nil, errors.New("assertion violation: n <= 0")
 	}
-	if n < cov.Nrow() {
-		return nil, errors.New("assertion violation")
+	if n >= cov.Nrow() {
+		return nil, errors.New("assertion violation: n has to be smaller than cov.Nrow()")
 	}
 
 	hess, err := NewMnAlgebraicSymMatrix(cov.Nrow())
@@ -94,11 +94,11 @@ func (this *mnCovarianceSqueezeStruct) squeeze(err *MinimumError, n int) (*Minim
 }
 
 func (this *mnCovarianceSqueezeStruct) SqueezeSymMatrix(hess *MnAlgebraicSymMatrix, n int) (*MnAlgebraicSymMatrix, error) {
-	if hess.nrow() > 0 {
-		return nil, errors.New("assertion violation")
+	if hess.nrow() <= 0 {
+		return nil, errors.New("assertion violation: n <= 0")
 	}
-	if n < hess.nrow() {
-		return nil, errors.New("assertion violation")
+	if n >= hess.nrow() {
+		return nil, errors.New("assertion violation: n has to be smaler than hess.Nrow()")
 	}
 
 	hs, err := NewMnAlgebraicSymMatrix(hess.nrow() - 1)
