@@ -4,7 +4,13 @@ type MnUserParameters struct {
 	TheTransformation *MnUserTransformation
 }
 
-func NewMnUserParameters(par, err []float64) *MnUserParameters {
+func NewMnUserParameters() *MnUserParameters {
+	return &MnUserParameters{
+		TheTransformation: NewMnUserTransformation(),
+	}
+}
+
+func NewMnUserParametersWithParErr(par, err []float64) *MnUserParameters {
 	return &MnUserParameters{
 		TheTransformation: NewMnUserTransformationFrom(par, err),
 	}
