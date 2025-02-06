@@ -32,7 +32,7 @@ func NewMnMigradWithParCovariance(fcn FCNBase, par []float64, cov *MnUserCovaria
 
 /** construct from FCNBase + double[] for parameters and MnUserCovariance */
 func NewMnMigradWithParCovarianceStra(fcn FCNBase, par []float64, cov *MnUserCovariance, stra int) *MnMigrad {
-	ups, _ := NewUserParamStateFromUserParamCovariance(par, cov)
+	ups, _ := NewMnUserParameterStateFlUc(par, cov)
 	return NewMnMigradWithParameterStateStrategy(fcn, ups, NewMnStrategyWithStra(stra))
 }
 
@@ -43,7 +43,7 @@ func NewMnMigradWithParameters(fcn FCNBase, par *MnUserParameters) *MnMigrad {
 
 /** construct from FCNBase + MnUserParameters */
 func NewMnMigradWithParametersStra(fcn FCNBase, par *MnUserParameters, stra int) *MnMigrad {
-	return NewMnMigradWithParametersCovariance(fcn, NewUserParameterStateFromUserParameter(par), NewMnStrategyWithStra(stra))
+	return NewMnMigradWithParameterStateStrategy(fcn, NewUserParameterStateFromUserParameter(par), NewMnStrategyWithStra(stra))
 }
 
 /** construct from FCNBase + MnUserParameters + MnUserCovariance with default strategy */

@@ -29,7 +29,7 @@ func NewMnMinimizeWithParCovariance(fcn FCNBase, par []float64, cov *MnUserCovar
 
 /** construct from FCNBase + double[] for parameters and MnUserCovariance */
 func NewMnMinimizeWithParCovarianceStra(fcn FCNBase, par []float64, cov *MnUserCovariance, stra int) *MnMinimize {
-	ups, _ := NewUserParamStateFromUserParamCovariance(par, cov)
+	ups, _ := NewMnUserParameterStateFlUc(par, cov)
 	return NewMnMinimizeWithParameterStateStrategy(fcn, ups, NewMnStrategyWithStra(stra))
 }
 

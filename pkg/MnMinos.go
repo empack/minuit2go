@@ -174,16 +174,19 @@ func (this *MnMinos) LovalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	var xmid []float64 = []float64{val}
 	var xdir []float64 = []float64{-err}
 
-	var ind int = upar.intOfExt(par)
+	ind, fnErr := upar.intOfExt(par)
+	if fnErr != nil {
+		return nil, fnErr
+	}
 	var m *MnAlgebraicSymMatrix = this.theMinimum.error().matrix()
 	var xunit float64 = math.Sqrt(errDef / err)
 	for i := 0; i < m.nrow(); i++ {
 		if i == ind {
 			continue
 		}
-		v, err := m.get(ind, i)
-		if err != nil {
-			return nil, err
+		v, fnErr := m.get(ind, i)
+		if fnErr != nil {
+			return nil, fnErr
 		}
 		var xdev float64 = xunit * v
 		var ext int = upar.ExtOfInt(i)
@@ -195,7 +198,10 @@ func (this *MnMinos) LovalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 
 	var toler float64 = 0.1
 	var cross *MnFunctionCross = NewMnFunctionCross(this.theFCN, upar, this.theMinimum.Fval(), this.theStrategy, errDef)
-	var aopt *MnCross = cross.cross(para, xmid, xdir, toler, maxcalls)
+	aopt, fnErr := cross.cross(para, xmid, xdir, toler, maxcalls)
+	if fnErr != nil {
+		return nil, fnErr
+	}
 
 	if aopt.atLimit() {
 		log.Printf("MnMinos parameter %d is at lower limit.\n", par)
@@ -242,16 +248,19 @@ func (this *MnMinos) UpvalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	var xmid []float64 = []float64{val}
 	var xdir []float64 = []float64{err}
 
-	var ind int = upar.intOfExt(par)
+	ind, fnErr := upar.intOfExt(par)
+	if fnErr != nil {
+		return nil, fnErr
+	}
 	var m *MnAlgebraicSymMatrix = this.theMinimum.error().matrix()
 	var xunit float64 = math.Sqrt(errDef / err)
 	for i := 0; i < m.nrow(); i++ {
 		if i == ind {
 			continue
 		}
-		v, err := m.get(ind, i)
-		if err != nil {
-			return nil, err
+		v, fnErr := m.get(ind, i)
+		if fnErr != nil {
+			return nil, fnErr
 		}
 		var xdev float64 = xunit * v
 		var ext int = upar.ExtOfInt(i)
@@ -263,7 +272,10 @@ func (this *MnMinos) UpvalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 
 	var toler float64 = 0.1
 	var cross *MnFunctionCross = NewMnFunctionCross(this.theFCN, upar, this.theMinimum.Fval(), this.theStrategy, errDef)
-	var aopt *MnCross = cross.cross(para, xmid, xdir, toler, maxcalls)
+	aopt, fnErr := cross.cross(para, xmid, xdir, toler, maxcalls)
+	if fnErr != nil {
+		return nil, fnErr
+	}
 
 	if aopt.atLimit() {
 		log.Printf("MnMinos parameter %d is at upper limit.")
