@@ -85,5 +85,5 @@ func (this *MnUserCovariance) size() int {
 }
 
 func (this *MnUserCovariance) String() string {
-	return MnPrint.toStringUserCovariance(this)
+	return MnPrint.toStringMnUserCovariance(this)
 }
