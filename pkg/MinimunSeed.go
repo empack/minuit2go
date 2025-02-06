@@ -62,12 +62,12 @@
 package minuit
 
 type MinimumSeed struct {
-	theState MinimumState
-	theTrafo MnUserTransformation
+	theState *MinimumState
+	theTrafo *MnUserTransformation
 	theValid bool
 }
 
-func NewMinimumSeed(state MinimumState, trafo MnUserTransformation) *MinimumSeed {
+func NewMinimumSeed(state *MinimumState, trafo *MnUserTransformation) *MinimumSeed {
 	return &MinimumSeed{
 		theState: state,
 		theTrafo: trafo,
@@ -76,7 +76,7 @@ func NewMinimumSeed(state MinimumState, trafo MnUserTransformation) *MinimumSeed
 }
 
 func (this *MinimumSeed) state() *MinimumState {
-	return &this.theState
+	return this.theState
 }
 
 func (this *MinimumSeed) parameters() *MinimumParameters {
@@ -92,7 +92,7 @@ func (this *MinimumSeed) gradient() *FunctionGradient {
 }
 
 func (this *MinimumSeed) trafo() *MnUserTransformation {
-	return &this.theTrafo
+	return this.theTrafo
 }
 
 func (this *MinimumSeed) precision() *MnMachinePrecision {

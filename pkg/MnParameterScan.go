@@ -16,7 +16,7 @@ func NewMnParameterScan(fcn FCNBase, par *MnUserParameters) *MnParameterScan {
 	return &MnParameterScan{
 		theFCN:        fcn,
 		theParameters: par,
-		theAmin:       fcn.ValueOf(par.params()),
+		theAmin:       fcn.ValueOf(par.Params()),
 	}
 }
 
@@ -41,7 +41,7 @@ func (this *MnParameterScan) scanWithMaxStepsLowHigh(par, maxsteps int, low, hig
 		maxsteps = 101
 	}
 	var result []*Point = make([]*Point, 0, maxsteps+1)
-	var params []float64 = this.theParameters.params()
+	var params []float64 = this.theParameters.Params()
 	result = append(result, NewPoint(params[par], this.theAmin))
 
 	if low > high {
@@ -52,25 +52,25 @@ func (this *MnParameterScan) scanWithMaxStepsLowHigh(par, maxsteps int, low, hig
 	}
 
 	if low == 0.0 && high == 0.0 {
-		low = params[par] - 2.*this.theParameters.error(par)
-		high = params[par] + 2.*this.theParameters.error(par)
+		low = params[par] - 2.*this.theParameters.Error(par)
+		high = params[par] + 2.*this.theParameters.Error(par)
 	}
 
-	if low == 0. && high == 0. && this.theParameters.parameter(par).hasLimits() {
-		if this.theParameters.parameter(par).hasLowerLimit() {
-			low = this.theParameters.parameter(par).lowerLimit()
+	if low == 0. && high == 0. && this.theParameters.Parameter(par).HasLimits() {
+		if this.theParameters.Parameter(par).HasLowerLimit() {
+			low = this.theParameters.Parameter(par).LowerLimit()
 		}
-		if this.theParameters.parameter(par).hasUpperLimit() {
-			high = this.theParameters.parameter(par).upperLimit()
+		if this.theParameters.Parameter(par).HasUpperLimit() {
+			high = this.theParameters.Parameter(par).UpperLimit()
 		}
 	}
 
-	if this.theParameters.parameter(par).hasLimits() {
-		if this.theParameters.parameter(par).hasLowerLimit() {
-			low = math.Max(low, this.theParameters.parameter(par).lowerLimit())
+	if this.theParameters.Parameter(par).HasLimits() {
+		if this.theParameters.Parameter(par).HasLowerLimit() {
+			low = math.Max(low, this.theParameters.Parameter(par).LowerLimit())
 		}
-		if this.theParameters.parameter(par).hasUpperLimit() {
-			high = math.Min(high, this.theParameters.parameter(par).upperLimit())
+		if this.theParameters.Parameter(par).HasUpperLimit() {
+			high = math.Min(high, this.theParameters.Parameter(par).UpperLimit())
 		}
 	}
 
@@ -80,7 +80,7 @@ func (this *MnParameterScan) scanWithMaxStepsLowHigh(par, maxsteps int, low, hig
 		params[par] = x0 + (float64(i) * stp)
 		var fval float64 = this.theFCN.ValueOf(params)
 		if fval < this.theAmin {
-			this.theParameters.setValue(par, params[par])
+			this.theParameters.SetValue(par, params[par])
 			this.theAmin = fval
 		}
 		result = append(result, NewPoint(params[par], fval))

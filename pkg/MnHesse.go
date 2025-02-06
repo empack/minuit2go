@@ -227,7 +227,10 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 		x.set(i, x.get(i)-dirin.get(i))
 	}
 
-	tmp := MnPosDef.TestError(NewMinimumError(vhmat, 1.0), prec)
+	tmp, fnErr := MnPosDef.TestError(NewMinimumError(vhmat, 1.0), prec)
+	if fnErr != nil {
+		return nil, fnErr
+	}
 	vhmat = tmp.invHessian()
 
 	// try catch block

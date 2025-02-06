@@ -13,14 +13,14 @@ func NewMnSeedGenerator() *MnSeedGenerator {
 	return &MnSeedGenerator{}
 }
 
-func (this *MnSeedGenerator) Generate(fcn *MnFcn, gc GradientCalculator, user *MnUserParameterState, stra *MnStrategy) (*MinimumSeed, error) {
-	var n int = st.variableParameters()
-	var prec *MnMachinePrecision = st.precision()
+func (this *MnSeedGenerator) Generate(fcn *MnFcn, gc GradientCalculator, st *MnUserParameterState, stra *MnStrategy) (*MinimumSeed, error) {
+	var n int = st.VariableParameters()
+	var prec *MnMachinePrecision = st.Precision()
 
 	// initial starting values
 	var x *MnAlgebraicVector = NewMnAlgebraicVector(n)
 	for i := 0; i < n; i++ {
-		x.set(i, st.intParameters().get(i))
+		x.set(i, st.intParameters()[i])
 	}
 	var fcnmin float64 = fcn.valueOf(x)
 	var pa *MinimumParameters = NewMinimumParameters(x, fcnmin)
@@ -41,7 +41,10 @@ func (this *MnSeedGenerator) Generate(fcn *MnFcn, gc GradientCalculator, user *M
 		if gc.(*AnalyticalGradientCalculator).checkGradient() {
 			var good bool = true
 			var hgc *HessianGradientCalculator = NewHessianGradientCalculator(fcn, st.trafo(), NewMnStrategyWithStra(2))
-			var hgrd *Pair[*FunctionGradient, *MnAlgebraicVector] = hgc.deltaGradient(pa, dgrad)
+			hgrd, fnErr := hgc.deltaGradient(pa, dgrad)
+			if fnErr != nil {
+				return nil, fnErr
+			}
 			for i := 0; i < n; i++ {
 				if math.Abs(hgrd.First.grad().get(i)-grd.grad().get(i)) > hgrd.Second.get(i) {
 					log.Printf("gradient discrepancy of external parameter %d (internal parameter %d) too large.\n", st.trafo().extOfInt(i), i)
@@ -65,10 +68,10 @@ func (this *MnSeedGenerator) Generate(fcn *MnFcn, gc GradientCalculator, user *M
 		return nil, err
 	}
 	var dcovar float64 = 1.0
-	if st.hasCovariance() {
+	if st.HasCovariance() {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				err = mat.set(i, j, st.intCovariance().get(i, j))
+				err = mat.set(i, j, st.intCovariance().Get(i, j))
 				if err != nil {
 					return nil, err
 				}
@@ -113,14 +116,14 @@ func (this *MnSeedGenerator) Generate(fcn *MnFcn, gc GradientCalculator, user *M
 		}
 	}
 
-	if stra.strategy() == 2 && !st.hasCovariance() {
+	if stra.Strategy() == 2 && !st.HasCovariance() {
 		//calculate full 2nd derivative
 		tmp, err := NewMnHesseWithStrategy(stra).CalculateWithMnfcnStTrafoMaxcalls(fcn, state, st.trafo(), 0)
 		if err != nil {
 			return nil, err
 		}
-		return NewMinimumSeed(tmp, st.trafo())
+		return NewMinimumSeed(tmp, st.trafo()), nil
 	}
 
-	return NewMinimumSeed(state, st.trafo())
+	return NewMinimumSeed(state, st.trafo()), nil
 }

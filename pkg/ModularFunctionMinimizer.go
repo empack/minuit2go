@@ -3,6 +3,10 @@ package minuit
 type ModularFunctionMinimizer struct {
 }
 
+func NewModularFunctionMinimizer() *ModularFunctionMinimizer {
+	return &ModularFunctionMinimizer{}
+}
+
 func (this *ModularFunctionMinimizer) minimizeWithError(fcn FCNBase, st *MnUserParameterState, strategy *MnStrategy, maxfcn int, toler, errorDef float64, useAnalyticalGradient, checkGradient bool) (*FunctionMinimum, error) {
 	var mfcn *MnUserFcn = NewMnUserFcn(fcn, errorDef, st.trafo())
 

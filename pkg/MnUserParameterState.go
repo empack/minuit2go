@@ -453,7 +453,11 @@ func NewMnUserParameterStateMsFlUt(st *MinimumState, up float64, trafo *MnUserTr
 
 	ups.theCovarianceValid = st.error().isValid()
 	if ups.theCovarianceValid {
-		ups.theCovariance = trafo.int2extCovariance(st.vec(), st.error().invHessian())
+		c_, fnErr := trafo.int2extCovariance(st.vec(), st.error().invHessian())
+		if fnErr != nil {
+			return nil, fnErr
+		}
+		ups.theCovariance = c_
 		dataClone := slices.Clone(st.error().invHessian().data())
 		ups.theIntCovariance = NewMnUserCovarianceWithDataNrow(dataClone, st.error().invHessian().nrow())
 		ups.theCovariance.scale(2 * up)

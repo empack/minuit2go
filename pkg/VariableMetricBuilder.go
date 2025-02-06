@@ -26,8 +26,11 @@ func (this *VariableMetricBuilder) Minimum(fcn *MnFcn, gc GradientCalculator, se
 		return nil, err
 	}
 
-	if strategy.strategy() == 2 || strategy.strategy() == 1 && fmin.Error().dcovar() > 0.05 {
-		st := NewMnHesse(strategy).calculate(fcn, fmin.state(), fmin.seed().trafo(), 0)
+	if strategy.Strategy() == 2 || strategy.Strategy() == 1 && fmin.error().dcovar() > 0.05 {
+		st, fnErr := NewMnHesseWithStrategy(strategy).CalculateWithMnfcnStTrafoMaxcalls(fcn, fmin.state(), fmin.seed().trafo(), 0)
+		if fnErr != nil {
+			return nil, fnErr
+		}
 		fmin.add(st)
 	}
 
@@ -72,7 +75,10 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc GradientCalculator, se
 				if gdel > 0.0 {
 					fmt.Println("VariableMetricBuilder: matrix not pos.def")
 					fmt.Printf("gdel > 0: %f\n", gdel)
-					s0 = MnPosDef.TestState(s0, prec)
+					s0, err = MnPosDef.TestState(s0, prec)
+					if err != nil {
+						return nil, err
+					}
 					mvsm, err = MnUtils.MulVSM(s0.error().invHessian(), s0.gradient().vec())
 					if err != nil {
 						return nil, err
@@ -89,7 +95,10 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc GradientCalculator, se
 					}
 				}
 
-				pp := MnLineSearch.search(fcn, s0.parameters(), step, gdel, prec)
+				pp, err := MnLineSearch.search(fcn, s0.parameters(), step, gdel, prec)
+				if err != nil {
+					return nil, err
+				}
 				if math.Abs(pp.y()-s0.fval()) < prec.eps() {
 					fmt.Println("VariableMetricBuilder: no improvement")
 					break
@@ -100,16 +109,22 @@ func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc GradientCalculator, se
 					return nil, err
 				}
 				p := NewMinimumParameters(added, pp.y())
-				g := gc.GradientWithGrad(p, s0.gradient())
-				edm, err = this.estimator().estimate(*g, *s0.error())
+				g, err := gc.GradientWithGrad(p, s0.gradient())
+				if err != nil {
+					return nil, err
+				}
+				edm, err = this.estimator().estimate(g, s0.error())
 				if err != nil {
 					return nil, err
 				}
 				if edm < 0.0 {
 					fmt.Println("VariableMetricBuilder: matrix not pos.def")
 					fmt.Println("edm < 0")
-					s0 = MnPosDef.TestState(s0, prec)
-					edm, err = this.estimator().estimate(*g, *s0.error())
+					s0, err = MnPosDef.TestState(s0, prec)
+					if err != nil {
+						return nil, err
+					}
+					edm, err = this.estimator().estimate(g, s0.error())
 					if err != nil {
 						return nil, err
 					}

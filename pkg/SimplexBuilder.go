@@ -162,9 +162,10 @@ func (this *SimplexBuilder) Minimum(mfcn *MnFcn, gc GradientCalculator, seed *Mi
 		if i == jh {
 			continue
 		}
-		pbar, err := MnUtils.AddV(pbar, MnUtils.MulV(simplex.get(i).Second, wg))
-		if err != nil {
-			return nil, err
+		var fnErr error
+		pbar, fnErr = MnUtils.AddV(pbar, MnUtils.MulV(simplex.get(i).Second, wg))
+		if fnErr != nil {
+			return nil, fnErr
 		}
 	}
 	var ybar float64 = mfcn.valueOf(pbar)
@@ -179,17 +180,20 @@ func (this *SimplexBuilder) Minimum(mfcn *MnFcn, gc GradientCalculator, seed *Mi
 	//   scale to sigmas on parameters werr^2 = dirin^2 * (up/edm)
 	dirin = MnUtils.MulV(dirin, math.Sqrt(mfcn.errorDef()/simplex.edm()))
 
-	var st *MinimumState = NewMinimumState(NewMinimumParametersFromMnAlgebraicVectors(pbar, dirin, ybar), simplex.edm(), mfcn.numOfCalls())
+	st, fnErr := NewMinimumState(NewMinimumParametersFromMnAlgebraicVectors(pbar, dirin, ybar), simplex.edm(), mfcn.numOfCalls())
+	if fnErr != nil {
+		return nil, fnErr
+	}
 	var states []*MinimumState = make([]*MinimumState, 0, 1)
 	states = append(states, st)
 
 	if mfcn.numOfCalls() > maxfcn {
 		log.Println("Simplex did not converge, #fcn calls exhausted.")
-		return NewFunctionMinimum(seed, states, mfcn.errorDef(), NewFunctionMinimum.MnReachedCallLimit()), nil
+		return NewFunctionMinimumWithSeedStatesUpReachedCallLimit(seed, states, mfcn.errorDef()), nil
 	}
 	if simplex.edm() > minedm {
 		log.Println("Simplex did not converge, edm > minedm.")
-		return NewFunctionMinimum(seed, states, mfcn.errorDef(), NewFunctionMinimum.MnAboveMaxEdm()), nil
+		return NewFunctionMinimumWithSeedStatesUpAboveMaxEdm(seed, states, mfcn.errorDef()), nil
 	}
-	return NewFunctionMinimum(seed, states, mfcn.errorDef()), nil
+	return NewFunctionMinimumWithSeedStatesUp(seed, states, mfcn.errorDef()), nil
 }

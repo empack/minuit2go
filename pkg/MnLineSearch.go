@@ -60,7 +60,6 @@ func (this *mnLineSearchStruct) search(fcn *MnFcn, st *MinimumParameters, step *
 	for ok := true; ok; {
 		// cut toler8 as function goes up
 		iterate = false
-		var pb *MnParabola = MnParabolaFactory.createWith2Points(p0, gdel, p1)
 		var denom float64 = 2. * (flast - F0 - gdel*slam) / (slam * slam)
 		if math.Abs(denom) < prec.eps() {
 			denom = -0.1 * gdel

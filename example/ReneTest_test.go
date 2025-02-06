@@ -100,7 +100,10 @@ func TestRene(t *testing.T) {
 		fmt.Printf("scan parameters: %s\n", scan.Parameters())
 		var plot *minuit.MnPlot = minuit.NewMnPlot()
 		for i := 0; i < upar.VariableParameters(); i++ {
-			var xy []*minuit.Point = scan.Scan(i)
+			xy, fnErr := scan.Scan(i)
+			if fnErr != nil {
+				t.Fatalf("scan failed with:\n %s\n", fnErr.Error())
+			}
 			plot.Plot(xy)
 		}
 		fmt.Printf("scan parameters: %s\n", scan.Parameters())

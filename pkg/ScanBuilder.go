@@ -8,10 +8,17 @@ import "math"
 type ScanBuilder struct {
 }
 
+func NewScanBuilder() *ScanBuilder {
+	return &ScanBuilder{}
+}
+
 func (s ScanBuilder) Minimum(mfcn *MnFcn, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
 	var x *MnAlgebraicVector = seed.parameters().vec().Clone()
-	var upst *MnUserParameterState = NewMnUserParameterState(seed.state(), mfcn.errorDef(), seed.trafo())
-	var scan *MnParameterScan = NewMnParameterScan(mfcn.fcn(), upst.parameters(), seed.fval())
+	upst, fnErr := NewMnUserParameterStateMsFlUt(seed.state(), mfcn.errorDef(), seed.trafo())
+	if fnErr != nil {
+		return nil, fnErr
+	}
+	var scan *MnParameterScan = NewMnParameterScanWithFval(mfcn.fcn(), upst.parameters(), seed.fval())
 	var amin float64 = scan.fval()
 	var n int = seed.trafo().variableParameters()
 	var dirin *MnAlgebraicVector = NewMnAlgebraicVector(n)
@@ -20,9 +27,13 @@ func (s ScanBuilder) Minimum(mfcn *MnFcn, gc GradientCalculator, seed *MinimumSe
 		scan.scan(ext)
 		if scan.fval() < amin {
 			amin = scan.fval()
-			x.set(i, seed.trafo().ext2int(ext, scan.parameters().value(ext)))
+			x.set(i, seed.trafo().ext2int(ext, scan.parameters().Value(ext)))
 		}
-		dirin.set(i, math.Sqrt(2.*mfcn.errorDef()*seed.error().invHessian().get(i, i)))
+		v_, fnErr := seed.error().invHessian().get(i, i)
+		if fnErr != nil {
+			return nil, fnErr
+		}
+		dirin.set(i, math.Sqrt(2.*mfcn.errorDef()*v_))
 	}
 
 	var mp *MinimumParameters = NewMinimumParametersFromMnAlgebraicVectors(x, dirin, amin)

@@ -299,8 +299,8 @@ func (this *MnUserTransformation) int2extError(i int, val, err float64) float64 
 	return dx
 }
 
-func (this *MnUserTransformation) int2extCovariance(vec *MnAlgebraicVector, cov *MnAlgebraicSymMatrix) *MnUserCovariance {
-	var result *MnUserCovariance = NewMnUserCovariance(cov.nrow())
+func (this *MnUserTransformation) int2extCovariance(vec *MnAlgebraicVector, cov *MnAlgebraicSymMatrix) (*MnUserCovariance, error) {
+	var result *MnUserCovariance = NewMnUserCovarianceWithNrow(cov.nrow())
 	for i := 0; i < vec.size(); i++ {
 		var dxdi float64 = 1.0
 		if this.theParameters[this.theExtOfInt[i]].HasLimits() {
@@ -311,10 +311,14 @@ func (this *MnUserTransformation) int2extCovariance(vec *MnAlgebraicVector, cov 
 			if this.theParameters[this.theExtOfInt[j]].HasLimits() {
 				dxdj = this.dInt2Ext(j, vec.get(j))
 			}
-			result.set(i, j, dxdi*cov.get(i, j)*dxdj)
+			v_, fnErr := cov.get(i, j)
+			if fnErr != nil {
+				return nil, fnErr
+			}
+			result.Set(i, j, dxdi*v_*dxdj)
 		}
 	}
-	return result
+	return result, nil
 }
 
 func (this *MnUserTransformation) ext2int(i int, val float64) float64 {

@@ -35,7 +35,10 @@ func (this *negativeG2LineSearchStruct) search(fcn *MnFcn, st *MinimumState, gc 
 					step.set(i, step.get(i)*(-1./math.Abs(dgrad.vec().get(i))))
 				}
 				var gdel float64 = step.get(i) * dgrad.vec().get(i)
-				var pp *MnParabolaPoint = MnLineSearch.search(fcn, pa, step, gdel, prec)
+				pp, fnErr := MnLineSearch.search(fcn, pa, step, gdel, prec)
+				if fnErr != nil {
+					return nil, fnErr
+				}
 				step = MnUtils.MulV(step, pp.x())
 				v_, err := MnUtils.AddV(pa.vec(), step)
 				if err != nil {

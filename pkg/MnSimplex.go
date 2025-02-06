@@ -21,17 +21,21 @@ func NewMnSimplex(fcn FCNBase, par, err []float64) *MnSimplex {
 
 /* construct from FCNBase + double[] for parameters and errors */
 func NewMnSimplexWithParErrStra(fcn FCNBase, par, err []float64, stra int) *MnSimplex {
-	return NewMnSimplexWithParameterStateStrategy(fcn, NewMnUserParameterState(par, err), NewMnStrategyWithStra(stra))
+	return NewMnSimplexWithParameterStateStrategy(fcn, NewUserParamStateFromParamAndErrValues(par, err), NewMnStrategyWithStra(stra))
 }
 
 /* construct from FCNBase + double[] for parameters and MnUserCovariance with default strategy */
-func NewMnSimplexWithParCov(fcn FCNBase, par []float64, cov *MnUserCovariance) *MnSimplex {
+func NewMnSimplexWithParCov(fcn FCNBase, par []float64, cov *MnUserCovariance) (*MnSimplex, error) {
 	return NewMnSimplexWithParCovStra(fcn, par, cov, DEFAULT_STRATEGY)
 }
 
 /* construct from FCNBase + double[] for parameters and MnUserCovariance */
-func NewMnSimplexWithParCovStra(fcn FCNBase, par []float64, cov *MnUserCovariance, stra int) *MnSimplex {
-	return NewMnSimplexWithParameterStateStrategy(fcn, NewMnUserParameterState(par, cov), NewMnStrategyWithStra(stra))
+func NewMnSimplexWithParCovStra(fcn FCNBase, par []float64, cov *MnUserCovariance, stra int) (*MnSimplex, error) {
+	state, fnErr := NewMnUserParameterStateFlUc(par, cov)
+	if fnErr != nil {
+		return nil, fnErr
+	}
+	return NewMnSimplexWithParameterStateStrategy(fcn, state, NewMnStrategyWithStra(stra)), nil
 }
 
 /* construct from FCNBase + MnUserParameters with default strategy */
@@ -41,17 +45,21 @@ func NewMnSimplexWithParameters(fcn FCNBase, par *MnUserParameters) *MnSimplex {
 
 /* construct from FCNBase + MnUserParameters */
 func NewMnSimplexWithParametersStra(fcn FCNBase, par *MnUserParameters, stra int) *MnSimplex {
-	return NewMnSimplexWithParameterStateStrategy(fcn, NewMnUserParameterState(par), NewMnStrategyWithStra(stra))
+	return NewMnSimplexWithParameterStateStrategy(fcn, NewUserParameterStateFromUserParameter(par), NewMnStrategyWithStra(stra))
 }
 
 /* construct from FCNBase + MnUserParameters + MnUserCovariance with default strategy */
-func NewMnSimplexWithParametersCovariance(fcn FCNBase, par *MnUserParameters, cov *MnUserCovariance) *MnSimplex {
+func NewMnSimplexWithParametersCovariance(fcn FCNBase, par *MnUserParameters, cov *MnUserCovariance) (*MnSimplex, error) {
 	return NewMnSimplexWithParametersCovarianceStra(fcn, par, cov, DEFAULT_STRATEGY)
 }
 
 /* construct from FCNBase + MnUserParameters + MnUserCovariance */
-func NewMnSimplexWithParametersCovarianceStra(fcn FCNBase, par *MnUserParameters, cov *MnUserCovariance, stra int) *MnSimplex {
-	return NewMnSimplexWithParameterStateStrategy(fcn, NewMnUserParameterState(par, cov), NewMnStrategyWithStra(stra))
+func NewMnSimplexWithParametersCovarianceStra(fcn FCNBase, par *MnUserParameters, cov *MnUserCovariance, stra int) (*MnSimplex, error) {
+	state, fnErr := NewUserParamStateFromUserParamCovariance(par, cov)
+	if fnErr != nil {
+		return nil, fnErr
+	}
+	return NewMnSimplexWithParameterStateStrategy(fcn, state, NewMnStrategyWithStra(stra)), nil
 }
 
 /* construct from FCNBase + MnUserParameterState + MnStrategy */

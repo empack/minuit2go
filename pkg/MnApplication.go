@@ -60,7 +60,7 @@ func (this *MnApplication) MinimizeWithMaxfcnToler(maxfcn int, toler float64) (*
 			maxfcn = 200 + 100*npar + 5*npar*npar
 		}
 
-		min, _ := this.Minimizer().minimize(this.theFCN, this.theState, this.theStrategy, maxfcn, toler,
+		min, _ := this.Minimizer().minimizeWithError(this.theFCN, this.theState, this.theStrategy, maxfcn, toler,
 			this.theErrorDef, this.useAnalyticalDerivatives, this.checkAnalyticalDerivatives)
 		this.theNumCall += min.Nfcn()
 		this.theState = min.UserState()
@@ -213,7 +213,7 @@ func (this *MnApplication) ext2int(i int, value float64) float64 {
 	return this.theState.ext2int(i, value)
 }
 
-func (this *MnApplication) intOfExt(i int) int {
+func (this *MnApplication) intOfExt(i int) (int, error) {
 	return this.theState.intOfExt(i)
 }
 
