@@ -13,6 +13,16 @@ type MnFunctionCross struct {
 	theErrorDef float64
 }
 
+func NewMnFunctionCross(fcn FCNBase, state *MnUserParameterState, fval float64, stra *MnStrategy, errorDef float64) *MnFunctionCross {
+	return &MnFunctionCross{
+		theFCN:      fcn,
+		theState:    state,
+		theFval:     fval,
+		theStrategy: stra,
+		theErrorDef: errorDef,
+	}
+}
+
 func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tlr float64, maxcalls int) *MnCross {
 	var npar int = len(par)
 	var nfcn int = 0
