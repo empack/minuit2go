@@ -6,5 +6,5 @@ package minuit
  * for the minimization;
  */
 type MinimumSeedGenerator interface {
-	generate(fcn *MnFcn, calc GradientCalculator, user *MnUserParameterState, stra *MnStrategy) *MinimumSeed
+	Generate(fcn *MnFcn, calc GradientCalculator, user *MnUserParameterState, stra *MnStrategy) (*MinimumSeed, error)
 }
