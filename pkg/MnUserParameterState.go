@@ -98,7 +98,7 @@ func copyMnUserParameterState(other *MnUserParameterState) *MnUserParameterState
 		theEDM:  other.theEDM,
 		theNFcn: other.theNFcn,
 
-		theParameters: other.theParameters.clone(),
+		theParameters: other.theParameters.Clone(),
 		//todo: handle copy
 		theCovariance: other.theCovariance.clone(),
 		theGlobalCC:   other.theGlobalCC.clone(),
@@ -124,7 +124,7 @@ func copyMnUserParameterState(other *MnUserParameterState) *MnUserParameterState
 func UserParamStateFromParamAndErrValues(par []float64, err []float64) *MnUserParameterState {
 	ups := &MnUserParameterState{
 		theValid:         true,
-		theParameters:    NewMnUserParameters(par, err),
+		theParameters:    NewMnUserParametersWithParErr(par, err),
 		theCovariance:    NewMnUserCovariance(),
 		theGlobalCC:      NewMnGlobalCorrelationCoeff(),
 		theIntCovariance: NewMnUserCovariance(),
@@ -160,19 +160,19 @@ func UserParameterStateFromUserParameter(par *MnUserParameters) *MnUserParameter
 		theParameters:    par,
 		theCovariance:    NewMnUserCovariance(),
 		theGlobalCC:      NewMnGlobalCorrelationCoeff(),
-		theIntParameters: make([]float64, par.variableParameters()),
+		theIntParameters: make([]float64, par.VariableParameters()),
 		theIntCovariance: NewMnUserCovariance(),
 	}
 
 	pos := 0
-	for _, ipar := range par.parameters() {
-		if ipar.isConst() || ipar.isFixed() {
+	for _, ipar := range par.Parameters() {
+		if ipar.IsConst() || ipar.IsFixed() {
 			continue
 		}
-		if ipar.hasLimits() {
-			ups.theIntParameters[pos] = ups.ext2int(ipar.number(), ipar.value())
+		if ipar.HasLimits() {
+			ups.theIntParameters[pos] = ups.ext2int(ipar.Number(), ipar.Value())
 		} else {
-			ups.theIntParameters[pos] = ipar.value()
+			ups.theIntParameters[pos] = ipar.Value()
 		}
 		pos += 1
 	}
@@ -202,7 +202,7 @@ func UserParameterStateFromUserParameter(par *MnUserParameters) *MnUserParameter
 func NewMnUserParameterStateFlFlIn(par []float64, cov []float64, nrow int) (*MnUserParameterState, error) {
 	ups := &MnUserParameterState{
 		theValid:         true,
-		theParameters:    par,
+		theParameters:    nil,
 		theCovariance:    NewMnUserCovarianceWithDataNrow(cov, nrow),
 		theGlobalCC:      NewMnGlobalCorrelationCoeff(),
 		theIntCovariance: NewMnUserCovarianceWithDataNrow(cov, nrow),
@@ -215,10 +215,10 @@ func NewMnUserParameterStateFlFlIn(par []float64, cov []float64, nrow int) (*MnU
 		if ups.theCovariance.Get(i, i) <= 0 {
 			retErr = fmt.Errorf("covariance must be positive")
 		}
-		err[i] = math.Sqrt(ups.theCovariance.get(i, i))
+		err[i] = math.Sqrt(ups.theCovariance.Get(i, i))
 		ups.theIntParameters[i] = par[i]
 	}
-	ups.theParameters = NewMnUserParameters(par, err)
+	ups.theParameters = NewMnUserParametersWithParErr(par, err)
 
 	if ups.theCovariance.Nrow() != ups.VariableParameters() {
 		retErr = fmt.Errorf("missmatch in covariance<->parameters")
@@ -267,7 +267,7 @@ func MnUserParameterStateFlUc(par []float64, cov *MnUserCovariance) (*MnUserPara
 		err[i] = math.Sqrt(ups.theCovariance.Get(i, i))
 		ups.theIntParameters = append(ups.theIntParameters, par[i])
 	}
-	ups.theParameters = NewMnUserParameters(par, err)
+	ups.theParameters = NewMnUserParametersWithParErr(par, err)
 	return ups, nil
 }
 
@@ -303,17 +303,17 @@ func UserParamStateFromUserParamCovariance(par *MnUserParameters, cov *MnUserCov
 		theIntCovariance:   cov.clone(),
 	}
 
-	ups.theIntParameters = make([]float64, par.variableParameters())
+	ups.theIntParameters = make([]float64, par.VariableParameters())
 	ups.theIntCovariance.scale(0.5)
 	pos := 0
-	for _, ipar := range par.parameters() {
-		if ipar.isConst() || ipar.isFixed() {
+	for _, ipar := range par.Parameters() {
+		if ipar.IsConst() || ipar.IsFixed() {
 			continue
 		}
-		if ipar.hasLimits() {
-			ups.theIntParameters[pos] = ups.ext2int(ipar.number(), ipar.value())
+		if ipar.HasLimits() {
+			ups.theIntParameters[pos] = ups.ext2int(ipar.Number(), ipar.Value())
 		} else {
-			ups.theIntParameters[pos] = ipar.value()
+			ups.theIntParameters[pos] = ipar.Value()
 		}
 	}
 	if ups.theCovariance.Nrow() != ups.VariableParameters() {
@@ -402,7 +402,7 @@ func NewMnUserParameterStateMsFlUt(st *MinimumState, up float64, trafo *MnUserTr
 		theParameters:      NewMnUserParameters(),
 		theCovariance:      NewMnUserCovariance(),
 		theGlobalCC:        NewMnGlobalCorrelationCoeff(),
-		theIntCovariance:   NewMnUserParameters(),
+		theIntCovariance:   NewMnUserCovariance(),
 	}
 
 	var retErr error
@@ -454,7 +454,8 @@ func NewMnUserParameterStateMsFlUt(st *MinimumState, up float64, trafo *MnUserTr
 	ups.theCovarianceValid = st.error().isValid()
 	if ups.theCovarianceValid {
 		ups.theCovariance = trafo.int2extCovariance(st.vec(), st.error().invHessian())
-		ups.theIntCovariance = NewMnUserCovarianceWithDataNrow(st.error().invHessian().data().clone(), st.error().invHessian().nrow())
+		dataClone := slices.Clone(st.error().invHessian().data())
+		ups.theIntCovariance = NewMnUserCovarianceWithDataNrow(dataClone, st.error().invHessian().nrow())
 		ups.theCovariance.scale(2 * up)
 
 		ups.theGlobalCC, _ = MnGlobalCorrelationCoeffFromAlgebraicSymMatrix(st.error().invHessian())
@@ -491,7 +492,7 @@ func (this *MnUserParameterState) intCovariance() *MnUserCovariance {
 
 /** transformation internal <-> external */
 func (this *MnUserParameterState) trafo() *MnUserTransformation {
-	return this.theParameters.trafo()
+	return this.theParameters.Trafo()
 }
 
 /**
@@ -538,25 +539,25 @@ func (this *MnUserParameterState) Nfcn() int {
 
 /** access to parameters (row-wise) */
 func (this *MnUserParameterState) MinuitParameters() []*MinuitParameter {
-	return this.theParameters.parameters()
+	return this.theParameters.Parameters()
 }
 
 /** access to parameters and errors in column-wise representation */
 func (this *MnUserParameterState) Params() []float64 {
-	return this.theParameters.params()
+	return this.theParameters.Params()
 }
 
 func (this *MnUserParameterState) errors() []float64 {
-	return this.theParameters.errors()
+	return this.theParameters.Errors()
 }
 
 func (this *MnUserParameterState) parameter(i int) *MinuitParameter {
-	return this.theParameters.parameter(i)
+	return this.theParameters.Parameter(i)
 }
 
 /** add free parameter name, value, error */
 func (this *MnUserParameterState) AddStFlFl(name string, val float64, err float64) {
-	this.theParameters.add(name, val, err)
+	this.theParameters.AddFree(name, val, err)
 	this.theIntParameters = append(this.theIntParameters, val)
 	this.theCovarianceValid = false
 	this.theGCCValid = false
@@ -565,7 +566,7 @@ func (this *MnUserParameterState) AddStFlFl(name string, val float64, err float6
 
 /** add limited parameter name, value, lower bound, upper bound */
 func (this *MnUserParameterState) AddStFlFlFlFl(name string, val float64, err float64, low float64, up float64) {
-	this.theParameters.add(name, val, err, low, up)
+	this.theParameters.AddLimited(name, val, err, low, up)
 	this.theCovarianceValid = false
 	this.theIntParameters = append(this.theIntParameters, this.ext2int(this.Index(name), val))
 	this.theGCCValid = false
@@ -574,7 +575,7 @@ func (this *MnUserParameterState) AddStFlFlFlFl(name string, val float64, err fl
 
 /** add const parameter name, value */
 func (this *MnUserParameterState) AddStFl(name string, val float64) {
-	this.theParameters.add(name, val)
+	this.theParameters.Add(name, val)
 	this.theValid = true
 }
 
@@ -592,15 +593,19 @@ func (this *MnUserParameterState) AddStFl(name string, val float64) {
 //	}
 //
 // / interaction via external number of parameter
-func (this *MnUserParameterState) Fix(e int) {
-	i := this.intOfExt(e)
+func (this *MnUserParameterState) Fix(e int) error {
+	i, err := this.intOfExt(e)
+	if err != nil {
+		return err
+	}
 	if this.theCovarianceValid {
 		this.theCovariance, _ = MnCovarianceSqueeze.Squeeze(this.theCovariance, i)
 		this.theIntCovariance, _ = MnCovarianceSqueeze.Squeeze(this.theIntCovariance, i)
 	}
 	remove(this.theIntParameters, i)
-	this.theParameters.fix(e)
+	this.theParameters.Fix(e)
 	this.theGCCValid = false
+	return nil
 }
 
 // public void release(int e)
@@ -615,16 +620,20 @@ func (this *MnUserParameterState) Fix(e int) {
 //	   else
 //		  theIntParameters.add(i, parameter(e).value());
 //	}
-func (this *MnUserParameterState) Release(e int) {
-	this.theParameters.release(e)
+func (this *MnUserParameterState) Release(e int) error {
+	this.theParameters.Release(e)
 	this.theCovarianceValid = false
 	this.theGCCValid = false
-	i := this.intOfExt(e)
+	i, err := this.intOfExt(e)
+	if err != nil {
+		return err
+	}
 	if this.parameter(e).HasLimits() {
 		slices.Insert(this.theIntParameters, i, this.ext2int(e, this.parameter(e).Value()))
 	} else {
 		slices.Insert(this.theIntParameters, i, this.parameter(e).Value())
 	}
+	return nil
 }
 
 // public void setValue(int e, double val)
@@ -640,20 +649,24 @@ func (this *MnUserParameterState) Release(e int) {
 //			 theIntParameters.set(i,val);
 //	   }
 //	}
-func (this *MnUserParameterState) SetValue(e int, val float64) {
-	this.theParameters.setValue(e, val)
+func (this *MnUserParameterState) SetValue(e int, val float64) error {
+	this.theParameters.SetValue(e, val)
 	if !this.parameter(e).IsFixed() && !this.parameter(e).IsConst() {
-		i := this.intOfExt(e)
+		i, err := this.intOfExt(e)
+		if err != nil {
+			return err
+		}
 		if this.parameter(e).HasLimits() {
 			this.theIntParameters[i] = this.ext2int(e, val)
 		} else {
 			this.theIntParameters[i] = val
 		}
 	}
+	return nil
 }
 
 func (this *MnUserParameterState) SetError(e int, err float64) {
-	this.theParameters.setError(e, err)
+	this.theParameters.SetError(e, err)
 }
 
 // public void setLimits(int e, double low, double up)
@@ -671,18 +684,22 @@ func (this *MnUserParameterState) SetError(e int, err float64) {
 //			 theIntParameters.set(i,ext2int(e, 0.5*(low+up)));
 //	   }
 //	}
-func (this *MnUserParameterState) SetLimits(e int, low float64, up float64) {
-	this.theParameters.setLimits(e, low, up)
+func (this *MnUserParameterState) SetLimits(e int, low float64, up float64) error {
+	this.theParameters.SetLimits(e, low, up)
 	this.theCovarianceValid = false
 	this.theGCCValid = false
 	if !this.parameter(e).IsFixed() && !this.parameter(e).IsConst() {
-		i := this.intOfExt(e)
+		i, err := this.intOfExt(e)
+		if err != nil {
+			return err
+		}
 		if low < this.theIntParameters[i] && this.theIntParameters[i] < up {
 			this.theIntParameters[i] = this.ext2int(e, this.theIntParameters[i])
 		} else {
 			this.theIntParameters[i] = this.ext2int(e, 0.5*(low+up))
 		}
 	}
+	return nil
 }
 
 // public void setUpperLimit(int e, double up)
@@ -700,18 +717,22 @@ func (this *MnUserParameterState) SetLimits(e int, low float64, up float64) {
 //			 theIntParameters.set(i,ext2int(e, up - 0.5*Math.abs(up + 1.)));
 //	   }
 //	}
-func (this *MnUserParameterState) SetUpperLimit(e int, up float64) {
-	this.theParameters.setUpperLimit(e, up)
+func (this *MnUserParameterState) SetUpperLimit(e int, up float64) error {
+	this.theParameters.SetUpperLimit(e, up)
 	this.theCovarianceValid = false
 	this.theGCCValid = false
 	if !this.parameter(e).IsFixed() && !this.parameter(e).IsConst() {
-		i := this.intOfExt(e)
+		i, err := this.intOfExt(e)
+		if err != nil {
+			return err
+		}
 		if this.theIntParameters[i] < up {
 			this.theIntParameters[i] = this.ext2int(e, this.theIntParameters[i])
 		} else {
 			this.theIntParameters[i] = this.ext2int(e, up-0.5*math.Abs(up+1))
 		}
 	}
+	return nil
 }
 
 // public void setLowerLimit(int e, double low)
@@ -729,18 +750,22 @@ func (this *MnUserParameterState) SetUpperLimit(e int, up float64) {
 //			 theIntParameters.set(i,ext2int(e, low + 0.5*Math.abs(low + 1.)));
 //	   }
 //	}
-func (this *MnUserParameterState) SetLowerLimit(e int, low float64) {
-	this.theParameters.setLowerLimit(e, low)
+func (this *MnUserParameterState) SetLowerLimit(e int, low float64) error {
+	this.theParameters.SetLowerLimit(e, low)
 	this.theCovarianceValid = false
 	this.theGCCValid = false
 	if !this.parameter(e).IsFixed() && !this.parameter(e).IsConst() {
-		i := this.intOfExt(e)
+		i, err := this.intOfExt(e)
+		if err != nil {
+			return err
+		}
 		if low < this.theIntParameters[i] {
 			this.theIntParameters[i] = this.ext2int(e, this.theIntParameters[i])
 		} else {
 			this.theIntParameters[i] = this.ext2int(e, low+0.5*math.Abs(low+1))
 		}
 	}
+	return nil
 }
 
 // public void removeLimits(int e)
@@ -752,21 +777,26 @@ func (this *MnUserParameterState) SetLowerLimit(e int, low float64) {
 //	   if(!parameter(e).isFixed() && !parameter(e).isConst())
 //		  theIntParameters.set(intOfExt(e),value(e));
 //	}
-func (this *MnUserParameterState) RemoveLimits(e int) {
-	this.theParameters.removeLimits(e)
+func (this *MnUserParameterState) RemoveLimits(e int) error {
+	this.theParameters.RemoveLimits(e)
 	this.theCovarianceValid = false
 	this.theGCCValid = false
 	if !this.parameter(e).IsFixed() && !this.parameter(e).IsConst() {
-		this.theIntParameters[this.intOfExt(e)] = this.Value(e)
+		i, err := this.intOfExt(e)
+		if err != nil {
+			return err
+		}
+		this.theIntParameters[i] = this.Value(e)
 	}
+	return nil
 }
 
 func (this *MnUserParameterState) Value(index int) float64 {
-	return this.theParameters.value(index)
+	return this.theParameters.Value(index)
 }
 
 func (this *MnUserParameterState) Error(index int) float64 {
-	return this.theParameters.error(index)
+	return this.theParameters.Error(index)
 }
 
 // / interaction via name of parameter
@@ -812,35 +842,35 @@ func (this *MnUserParameterState) ErrorSt(name string) float64 {
 
 /** convert name into external number of parameter */
 func (this *MnUserParameterState) Index(name string) int {
-	return this.theParameters.index(name)
+	return this.theParameters.Index(name)
 }
 
 /** convert external number into name of parameter */
 func (this *MnUserParameterState) Name(index int) string {
-	return this.theParameters.name(index)
+	return this.theParameters.Name(index)
 }
 
 // transformation internal <-> external
 func (this *MnUserParameterState) int2ext(i int, val float64) float64 {
-	return this.theParameters.trafo().int2ext(i, val)
+	return this.theParameters.Trafo().int2ext(i, val)
 }
 func (this *MnUserParameterState) ext2int(i int, val float64) float64 {
-	return this.theParameters.trafo().ext2int(i, val)
+	return this.theParameters.Trafo().ext2int(i, val)
 }
-func (this *MnUserParameterState) intOfExt(ext int) int {
-	return this.theParameters.trafo().intOfExt(ext)
+func (this *MnUserParameterState) intOfExt(ext int) (int, error) {
+	return this.theParameters.Trafo().intOfExt(ext)
 }
 func (this *MnUserParameterState) ExtOfInt(internal int) int {
-	return this.theParameters.trafo().extOfInt(internal)
+	return this.theParameters.Trafo().extOfInt(internal)
 }
 func (this *MnUserParameterState) VariableParameters() int {
-	return this.theParameters.variableParameters()
+	return this.theParameters.VariableParameters()
 }
 func (this *MnUserParameterState) Precision() *MnMachinePrecision {
-	return this.theParameters.precision()
+	return this.theParameters.Precision()
 }
 func (this *MnUserParameterState) SetPrecision(eps float64) {
-	this.theParameters.setPrecision(eps)
+	this.theParameters.SetPrecision(eps)
 }
 func (this *MnUserParameterState) ToString() string {
 	return MnPrint.toStringMnUserParameterState(this)
