@@ -75,7 +75,7 @@ func (this *MnPrintStruct) PrintFunctionMinimum(builder *strings.Builder, min *F
 
 	builder.WriteString(fmt.Sprintf("%g\n", min.UserParameters()))
 	builder.WriteString(fmt.Sprintf("%g\n", min.UserCovariance()))
-	builder.WriteString(fmt.Sprintf("%g\n", min.UserState().GlobalCC()))
+	builder.WriteString(fmt.Sprintf("%g\n", min.UserState().globalCC()))
 	if !min.IsValid() {
 		builder.WriteString("WARNING: FunctionMinimum is invalid.\n")
 	}
@@ -116,33 +116,33 @@ func (this *MnPrintStruct) PrintMnUserParameters(builder *strings.Builder, par *
 	atLoLim := false
 	atHiLim := false
 
-	for _, ipar := range par.parameters() {
-		builder.WriteString(fmt.Sprintf(" %5d || %9s || ", ipar.number(), ipar.name()))
+	for _, ipar := range par.Parameters() {
+		builder.WriteString(fmt.Sprintf(" %5d || %9s || ", ipar.Number(), ipar.Name()))
 		if ipar.IsConst() {
-			builder.WriteString(fmt.Sprintf("         || %10g   ||", ipar.value()))
+			builder.WriteString(fmt.Sprintf("         || %10g   ||", ipar.Value()))
 		} else if ipar.IsFixed() {
-			builder.WriteString(fmt.Sprintf("  fixed  || %10g   ||\n", ipar.value()))
+			builder.WriteString(fmt.Sprintf("  fixed  || %10g   ||\n", ipar.Value()))
 		} else if ipar.HasLimits() {
-			if ipar.error() > 0.0 {
-				builder.WriteString(fmt.Sprintf(" limited || %10g", ipar.value()))
-				if math.Abs(ipar.value()-ipar.lowerLimit()) < par.precision().eps2() {
+			if ipar.Error() > 0.0 {
+				builder.WriteString(fmt.Sprintf(" limited || %10g", ipar.Value()))
+				if math.Abs(ipar.Value()-ipar.LowerLimit()) < par.Precision().eps2() {
 					builder.WriteString("* ")
 					atLoLim = true
 				}
 
-				if math.Abs(ipar.value()-ipar.upperLimit()) < par.precision().eps2() {
+				if math.Abs(ipar.Value()-ipar.UpperLimit()) < par.Precision().eps2() {
 					builder.WriteString("**")
 					atHiLim = true
 				}
 
-				builder.WriteString(fmt.Sprintf(" || %10g\n", ipar.error()))
+				builder.WriteString(fmt.Sprintf(" || %10g\n", ipar.Error()))
 			} else {
-				builder.WriteString(fmt.Sprintf("  free   || %10g || no\n", ipar.value()))
+				builder.WriteString(fmt.Sprintf("  free   || %10g || no\n", ipar.Value()))
 			}
-		} else if ipar.error() > 0.0 {
-			builder.WriteString(fmt.Sprintf("  free   || %10g || %10g\n", ipar.value(), ipar.error()))
+		} else if ipar.Error() > 0.0 {
+			builder.WriteString(fmt.Sprintf("  free   || %10g || %10g\n", ipar.Value(), ipar.Error()))
 		} else {
-			builder.WriteString(fmt.Sprintf("  free   || %10g || no\n", ipar.value()))
+			builder.WriteString(fmt.Sprintf("  free   || %10g || no\n", ipar.Value()))
 		}
 	}
 
@@ -225,15 +225,15 @@ func (this *MnPrintStruct) PrintMnUserParameterState(builder *strings.Builder, s
 		builder.WriteString("\n")
 	}
 
-	builder.WriteString(fmt.Sprintf("# of function calls: %g\n", state.nfcn()))
-	builder.WriteString(fmt.Sprintf("function value: %g\n", state.fval()))
-	builder.WriteString(fmt.Sprintf("expected distance to the minimum (edm): %g\n", state.edm()))
+	builder.WriteString(fmt.Sprintf("# of function calls: %g\n", state.Nfcn()))
+	builder.WriteString(fmt.Sprintf("function value: %g\n", state.Fval()))
+	builder.WriteString(fmt.Sprintf("expected distance to the minimum (edm): %g\n", state.Edm()))
 	builder.WriteString(fmt.Sprintf("external parameters: %g\n", state.parameters()))
-	if state.hasCovariance() {
+	if state.HasCovariance() {
 		builder.WriteString(fmt.Sprintf("covariance matrix: %g\n", state.covariance()))
 	}
 
-	if state.hasGlobalCC() {
+	if state.HasGlobalCC() {
 		builder.WriteString(fmt.Sprintf("global correlation coefficients : %g\n", state.globalCC()))
 	}
 
