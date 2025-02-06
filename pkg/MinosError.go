@@ -92,3 +92,7 @@ func (this *MinosError) Nfcn() int {
 func (this *MinosError) Min() float64 {
 	return this.theMinValue
 }
+
+func (this *MinosError) String() string {
+	return MnPrint.toStringMinosError(this)
+}

@@ -427,4 +427,4 @@ func (this *MnAlgebraicSymMatrix) ncol() int {
 	return this.nrow()
 }
 
-func (this *MnAlgebraicSymMatrix) String() string { return MnPrint.toStringAlgebraicSymMatrix(this) }
+func (this *MnAlgebraicSymMatrix) String() string { return MnPrint.toStringMnAlgebraicSymMatrix(this) }

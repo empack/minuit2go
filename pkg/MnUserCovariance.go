@@ -83,3 +83,7 @@ func (this *MnUserCovariance) NCol() int {
 func (this *MnUserCovariance) size() int {
 	return len(this.theData)
 }
+
+func (this *MnUserCovariance) String() string {
+	return MnPrint.toStringUserCovariance(this)
+}
