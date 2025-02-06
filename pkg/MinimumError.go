@@ -18,11 +18,15 @@ type MinimumError struct {
 	theAvailable    bool
 }
 
-func NewMinimumErrorFromNumber(n int) *MinimumError {
-	return &MinimumError{
-		theMatrix: NewMnAlgebraicSymMatrix(n),
-		theDCovar: 1.0,
+func NewMinimumErrorFromNumber(n int) (*MinimumError, error) {
+	m, err := NewMnAlgebraicSymMatrix(n)
+	if err != nil {
+		return nil, err
 	}
+	return &MinimumError{
+		theMatrix: m,
+		theDCovar: 1.0,
+	}, nil
 }
 
 func NewMinimumError(mat *MnAlgebraicSymMatrix, dcov float64) *MinimumError {
@@ -88,25 +92,35 @@ func NewMinimumErrorFromMnNotPosDef(mat *MnAlgebraicSymMatrix, _ *MnNotPosDef) *
 }
 
 func (this *MinimumError) matrix() *MnAlgebraicSymMatrix {
-	return MnUtils.mul(this.theMatrix, 2)
+	return MnUtils.MulSM(this.theMatrix, 2)
 }
 
 func (this *MinimumError) invHessian() *MnAlgebraicSymMatrix {
 	return this.theMatrix
 }
 
-func (this *MinimumError) hessian() *MnAlgebraicSymMatrix {
+func (this *MinimumError) hessian() (*MnAlgebraicSymMatrix, error) {
 	var tmp *MnAlgebraicSymMatrix = this.theMatrix.Clone()
 	err := tmp.invert()
 	if err == nil {
-		return tmp
+		return tmp, nil
 	} else {
 		log.Println("BasicMinimumError inversion fails; return diagonal matrix.")
-		var tmp *MnAlgebraicSymMatrix = NewMnAlgebraicSymMatrix(this.theMatrix.nrow())
-		for i := 0; i < this.theMatrix.nrow(); i++ {
-			tmp.set(i, i, 1.0/this.theMatrix.get(i, i))
+		tmp, err := NewMnAlgebraicSymMatrix(this.theMatrix.nrow())
+		if err != nil {
+			return nil, err
 		}
-		return tmp
+		for i := 0; i < this.theMatrix.nrow(); i++ {
+			v, err := this.theMatrix.get(i, i)
+			if err != nil {
+				return nil, err
+			}
+			err = tmp.set(i, i, 1.0/v)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return tmp, nil
 	}
 }
 
