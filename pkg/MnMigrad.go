@@ -22,7 +22,7 @@ func NewMnMigradWithParErr(fcn FCNBase, par, err []float64) *MnMigrad {
 
 /** construct from FCNBase + double[] for parameters and errors */
 func NewMnMigradWithParErrStrategy(fcn FCNBase, par, err []float64, stra int) *MnMigrad {
-	return NewMnMigradWithParameterStateStrategy(fcn, NewMnUserParameterState(par, err), NewMnStrategyWithStra(stra))
+	return NewMnMigradWithParameterStateStrategy(fcn, UserParamStateFromParamAndErrValues(par, err), NewMnStrategyWithStra(stra))
 }
 
 /** construct from FCNBase + double[] for parameters and MnUserCovariance with default strategy */
@@ -32,7 +32,8 @@ func NewMnMigradWithParCovariance(fcn FCNBase, par []float64, cov *MnUserCovaria
 
 /** construct from FCNBase + double[] for parameters and MnUserCovariance */
 func NewMnMigradWithParCovarianceStra(fcn FCNBase, par []float64, cov *MnUserCovariance, stra int) *MnMigrad {
-	return NewMnMigradWithParameterStateStrategy(fcn, NewMnUserParameterState(par, cov), NewMnStrategyWithStra(stra))
+	ups, _ := UserParamStateFromUserParamCovariance(par, cov)
+	return NewMnMigradWithParameterStateStrategy(fcn, ups, NewMnStrategyWithStra(stra))
 }
 
 /** construct from FCNBase + MnUserParameters with default strategy */
@@ -42,7 +43,7 @@ func NewMnMigradWithParameters(fcn FCNBase, par *MnUserParameters) *MnMigrad {
 
 /** construct from FCNBase + MnUserParameters */
 func NewMnMigradWithParametersStra(fcn FCNBase, par *MnUserParameters, stra int) *MnMigrad {
-	return NewMnMigradWithParametersCovariance(fcn, NewMnUserParameterState(par), NewMnStrategyWithStra(stra))
+	return NewMnMigradWithParametersCovariance(fcn, UserParameterStateFromUserParameter(par), NewMnStrategyWithStra(stra))
 }
 
 /** construct from FCNBase + MnUserParameters + MnUserCovariance with default strategy */
@@ -52,7 +53,8 @@ func NewMnMigradWithParametersCovariance(fcn FCNBase, par *MnUserParameters, cov
 
 /** construct from FCNBase + MnUserParameters + MnUserCovariance */
 func NewMnMigradWithParametersCovarianceStra(fcn FCNBase, par *MnUserParameters, cov *MnUserCovariance, stra int) *MnMigrad {
-	return NewMnMigradWithParameterStateStrategy(fcn, NewMnUserParameterState(par, cov), NewMnStrategyWithStra(stra))
+	ups, _ := UserParamStateFromUserParamCovariance(par, cov)
+	return NewMnMigradWithParameterStateStrategy(fcn, ups, NewMnStrategyWithStra(stra))
 }
 
 /** construct from FCNBase + MnUserParameterState + MnStrategy */

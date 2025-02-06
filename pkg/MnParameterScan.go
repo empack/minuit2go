@@ -65,7 +65,7 @@ func (this *MnParameterScan) scanWithMaxStepsLowHigh(par, maxsteps int, low, hig
 		}
 	}
 
-	if theParameters.parameter(par).hasLimits() {
+	if this.theParameters.parameter(par).hasLimits() {
 		if this.theParameters.parameter(par).hasLowerLimit() {
 			low = math.Max(low, this.theParameters.parameter(par).lowerLimit())
 		}

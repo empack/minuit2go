@@ -60,9 +60,9 @@ func (this *MnApplication) MinimizeWithMaxfcnToler(maxfcn int, toler float64) (*
 			maxfcn = 200 + 100*npar + 5*npar*npar
 		}
 
-		min := this.Minimizer().minimize(this.theFCN, this.theState, this.theStrategy, maxfcn, toler,
+		min, _ := this.Minimizer().minimize(this.theFCN, this.theState, this.theStrategy, maxfcn, toler,
 			this.theErrorDef, this.useAnalyticalDerivatives, this.checkAnalyticalDerivatives)
-		this.theNumCall += min.nfcn()
+		this.theNumCall += min.Nfcn()
 		this.theState = min.UserState()
 		return min, nil
 	}
@@ -102,7 +102,7 @@ func (this *MnApplication) NumOfCalls() int {
 }
 
 func (this *MnApplication) minuitParameters() []*MinuitParameter {
-	return this.theState.minuitParameters()
+	return this.theState.MinuitParameters()
 }
 
 func (this *MnApplication) Params() []float64 {
@@ -110,7 +110,7 @@ func (this *MnApplication) Params() []float64 {
 }
 
 func (this *MnApplication) Errors() []float64 {
-	return this.theState.Errors()
+	return this.theState.errors()
 }
 
 func (this *MnApplication) parameter(i int) *MinuitParameter {
@@ -118,15 +118,15 @@ func (this *MnApplication) parameter(i int) *MinuitParameter {
 }
 
 func (this *MnApplication) AddWithErr(name string, val, err float64) {
-	this.theState.AddWithError(name, val, err)
+	this.theState.AddStFlFl(name, val, err)
 }
 
 func (this *MnApplication) AddWithErrLowUp(name string, val, err, low, up float64) {
-	this.theState.AddWithErrLowUp(name, val, err, low, up)
+	this.theState.AddStFlFlFlFl(name, val, err, low, up)
 }
 
 func (this *MnApplication) Add(name string, val float64) {
-	this.theState.Add(name, val)
+	this.theState.AddStFl(name, val)
 }
 
 func (this *MnApplication) Fix(index int) {
@@ -162,27 +162,27 @@ func (this *MnApplication) Error(index int) float64 {
 }
 
 func (this *MnApplication) FixWithName(name string) {
-	this.theState.FixWithName(name)
+	this.theState.FixSt(name)
 }
 
 func (this *MnApplication) ReleaseWithName(name string) {
-	this.theState.ReleaseWithName(name)
+	this.theState.ReleaseSt(name)
 }
 
 func (this *MnApplication) SetValueWithName(name string, val float64) {
-	this.theState.SetValueWithName(name, val)
+	this.theState.SetValueStFl(name, val)
 }
 
 func (this *MnApplication) SetErrorWithName(name string, err float64) {
-	this.theState.SetErrorWithName(name, err)
+	this.theState.SetErrorStFl(name, err)
 }
 
 func (this *MnApplication) SetLimitsWithName(name string, low, up float64) {
-	this.theState.SetLimitsWithName(name, low, up)
+	this.theState.SetLimitsStFlFl(name, low, up)
 }
 
 func (this *MnApplication) RemoveLimitsWithName(name string) {
-	this.theState.RemoveLimitsWithName(name)
+	this.theState.RemoveLimitsSt(name)
 }
 
 func (this *MnApplication) SetPrecision(prec float64) {
@@ -190,11 +190,11 @@ func (this *MnApplication) SetPrecision(prec float64) {
 }
 
 func (this *MnApplication) ValueWithName(name string) float64 {
-	return this.theState.ValueWithName(name)
+	return this.theState.ValueSt(name)
 }
 
 func (this *MnApplication) ErrorWithName(name string) float64 {
-	return this.theState.ErrorWithName(name)
+	return this.theState.ErrorSt(name)
 }
 
 func (this *MnApplication) Index(name string) int {
@@ -218,11 +218,11 @@ func (this *MnApplication) intOfExt(i int) int {
 }
 
 func (this *MnApplication) extOfInt(i int) int {
-	return this.theState.extOfInt(i)
+	return this.theState.ExtOfInt(i)
 }
 
 func (this *MnApplication) VariableParameters() int {
-	return this.theState.VariableParamters()
+	return this.theState.VariableParameters()
 }
 
 func (this *MnApplication) SetUseAnalyticalDerivatives(use bool) {

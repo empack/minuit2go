@@ -121,7 +121,7 @@ func copyMnUserParameterState(other *MnUserParameterState) *MnUserParameterState
 // 	}
 
 /** construct from user parameters (before minimization) */
-func NewMnUserParameterStateFlFl(par []float64, err []float64) *MnUserParameterState {
+func UserParamStateFromParamAndErrValues(par []float64, err []float64) *MnUserParameterState {
 	ups := &MnUserParameterState{
 		theValid:         true,
 		theParameters:    NewMnUserParameters(par, err),
@@ -153,7 +153,7 @@ func NewMnUserParameterStateFlFl(par []float64, err []float64) *MnUserParameterS
 //			 theIntParameters.add(ipar.value());
 //	   }
 //	}
-func NewMnUserParameterStateUp(par *MnUserParameters) *MnUserParameterState {
+func UserParameterStateFromUserParameter(par *MnUserParameters) *MnUserParameterState {
 
 	ups := &MnUserParameterState{
 		theValid:         true,
@@ -203,16 +203,16 @@ func NewMnUserParameterStateFlFlIn(par []float64, cov []float64, nrow int) (*MnU
 	ups := &MnUserParameterState{
 		theValid:         true,
 		theParameters:    par,
-		theCovariance:    NewMnUserCovariance(cov, nrow),
+		theCovariance:    NewMnUserCovarianceWithDataNrow(cov, nrow),
 		theGlobalCC:      NewMnGlobalCorrelationCoeff(),
-		theIntCovariance: NewMnUserCovariance(cov, nrow),
+		theIntCovariance: NewMnUserCovarianceWithDataNrow(cov, nrow),
 	}
 
 	ups.theIntParameters = make([]float64, len(par))
 	var retErr error = nil
 	err := make([]float64, len(par))
 	for i := 0; i < len(par); i++ {
-		if ups.theCovariance.get(i, i) <= 0 {
+		if ups.theCovariance.Get(i, i) <= 0 {
 			retErr = fmt.Errorf("covariance must be positive")
 		}
 		err[i] = math.Sqrt(ups.theCovariance.get(i, i))
@@ -220,7 +220,7 @@ func NewMnUserParameterStateFlFlIn(par []float64, cov []float64, nrow int) (*MnU
 	}
 	ups.theParameters = NewMnUserParameters(par, err)
 
-	if ups.theCovariance.nrow() != ups.VariableParameters() {
+	if ups.theCovariance.Nrow() != ups.VariableParameters() {
 		retErr = fmt.Errorf("missmatch in covariance<->parameters")
 	}
 	return ups, retErr
@@ -245,7 +245,7 @@ func NewMnUserParameterStateFlFlIn(par []float64, cov []float64, nrow int) (*MnU
 //	   }
 //	   theParameters = new MnUserParameters(par, err);
 //	}
-func MnUserParameterStateFlUc(par []float64, cov MnUserCovariance) (*MnUserParameterState, error) {
+func MnUserParameterStateFlUc(par []float64, cov *MnUserCovariance) (*MnUserParameterState, error) {
 
 	ups := &MnUserParameterState{
 		theValid:           true,
@@ -256,15 +256,15 @@ func MnUserParameterStateFlUc(par []float64, cov MnUserCovariance) (*MnUserParam
 	}
 
 	ups.theIntParameters = make([]float64, len(par))
-	if ups.theCovariance.nrow() != ups.VariableParameters() {
+	if ups.theCovariance.Nrow() != ups.VariableParameters() {
 		return nil, fmt.Errorf("Bad covariance size")
 	}
 	err := make([]float64, len(par))
 	for i := 0; i < len(par); i++ {
-		if ups.theCovariance.get(i, i) <= 0 {
+		if ups.theCovariance.Get(i, i) <= 0 {
 			return nil, fmt.Errorf("covariance must be positive")
 		}
-		err[i] = math.Sqrt(ups.theCovariance.get(i, i))
+		err[i] = math.Sqrt(ups.theCovariance.Get(i, i))
 		ups.theIntParameters = append(ups.theIntParameters, par[i])
 	}
 	ups.theParameters = NewMnUserParameters(par, err)
@@ -293,7 +293,7 @@ func MnUserParameterStateFlUc(par []float64, cov MnUserCovariance) (*MnUserParam
 //	   }
 //	   assert(theCovariance.nrow() == variableParameters());
 //	}
-func MnUserParameterStateUpUc(par MnUserParameters, cov MnUserCovariance) (*MnUserParameterState, error) {
+func UserParamStateFromUserParamCovariance(par *MnUserParameters, cov *MnUserCovariance) (*MnUserParameterState, error) {
 	ups := &MnUserParameterState{
 		theValid:           true,
 		theCovarianceValid: true,
@@ -316,7 +316,7 @@ func MnUserParameterStateUpUc(par MnUserParameters, cov MnUserCovariance) (*MnUs
 			ups.theIntParameters[pos] = ipar.value()
 		}
 	}
-	if ups.theCovariance.nrow() != ups.VariableParameters() {
+	if ups.theCovariance.Nrow() != ups.VariableParameters() {
 		return ups, fmt.Errorf("Bad covariance size")
 	}
 	return ups, nil
@@ -391,7 +391,7 @@ func MnUserParameterStateUpUc(par MnUserParameters, cov MnUserCovariance) (*MnUs
 
 // 	}
 /** construct from internal parameters (after minimization) */
-func MnUserParameterStateMsFlUt(st MinimumState, up float64, trafo MnUserTransformation) (*MnUserParameterState, error) {
+func NewMnUserParameterStateMsFlUt(st *MinimumState, up float64, trafo *MnUserTransformation) (*MnUserParameterState, error) {
 	ups := &MnUserParameterState{
 		theValid:           st.isValid(),
 		theCovarianceValid: false,
@@ -425,7 +425,8 @@ func MnUserParameterStateMsFlUt(st MinimumState, up float64, trafo MnUserTransfo
 			i, _ := trafo.intOfExt(ipar.Number())
 			var err float64
 			if st.hasCovariance() {
-				err = math.Sqrt(2 * up * st.error().invHessian().get(i, i))
+				hessII, _ := st.error().invHessian().get(i, i)
+				err = math.Sqrt(2 * up * hessII)
 			} else {
 				st.parameters().dirin().get(i)
 			}
@@ -441,7 +442,8 @@ func MnUserParameterStateMsFlUt(st MinimumState, up float64, trafo MnUserTransfo
 			i, _ := trafo.intOfExt(ipar.Number())
 			var err float64
 			if st.hasCovariance() {
-				math.Sqrt(2 * up * st.error().invHessian().get(i, i))
+				hessII, _ := st.error().invHessian().get(i, i)
+				math.Sqrt(2 * up * hessII)
 			} else {
 				st.parameters().dirin().get(i)
 			}
@@ -452,11 +454,12 @@ func MnUserParameterStateMsFlUt(st MinimumState, up float64, trafo MnUserTransfo
 	ups.theCovarianceValid = st.error().isValid()
 	if ups.theCovarianceValid {
 		ups.theCovariance = trafo.int2extCovariance(st.vec(), st.error().invHessian())
-		ups.theIntCovariance = NewMnUserCovariance(st.error().invHessian().data().clone(), st.error().invHessian().nrow())
+		ups.theIntCovariance = NewMnUserCovarianceWithDataNrow(st.error().invHessian().data().clone(), st.error().invHessian().nrow())
 		ups.theCovariance.scale(2 * up)
-		ups.theGlobalCC = NewMnGlobalCorrelationCoeff(st.error().invHessian())
+
+		ups.theGlobalCC, _ = MnGlobalCorrelationCoeffFromAlgebraicSymMatrix(st.error().invHessian())
 		ups.theGCCValid = true
-		if ups.theCovariance.nrow() != ups.VariableParameters() {
+		if ups.theCovariance.Nrow() != ups.VariableParameters() {
 			retErr = fmt.Errorf("dimension missmatch covariance/variable params")
 		}
 	}
@@ -592,8 +595,8 @@ func (this *MnUserParameterState) AddStFl(name string, val float64) {
 func (this *MnUserParameterState) Fix(e int) {
 	i := this.intOfExt(e)
 	if this.theCovarianceValid {
-		this.theCovariance = MnCovarianceSqueeze.squeeze(this.theCovariance, i)
-		this.theIntCovariance = MnCovarianceSqueeze.squeeze(this.theIntCovariance, i)
+		this.theCovariance, _ = MnCovarianceSqueeze.Squeeze(this.theCovariance, i)
+		this.theIntCovariance, _ = MnCovarianceSqueeze.Squeeze(this.theIntCovariance, i)
 	}
 	remove(this.theIntParameters, i)
 	this.theParameters.fix(e)
@@ -813,7 +816,7 @@ func (this *MnUserParameterState) Index(name string) int {
 }
 
 /** convert external number into name of parameter */
-func (this *MnUserParameterState) Name(index int) {
+func (this *MnUserParameterState) Name(index int) string {
 	return this.theParameters.name(index)
 }
 
@@ -840,7 +843,7 @@ func (this *MnUserParameterState) SetPrecision(eps float64) {
 	this.theParameters.setPrecision(eps)
 }
 func (this *MnUserParameterState) ToString() string {
-	return MnPrint.toString(this)
+	return MnPrint.toStringMnUserParameterState(this)
 }
 
 func remove(slice []float64, s int) []float64 {

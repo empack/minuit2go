@@ -51,10 +51,10 @@ func (this *MnMinos) minosWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	if !this.theMinimum.IsValid() {
 		return nil, errors.New("assertion violation: Minimum is Invalid")
 	}
-	if this.theMinimum.UserState().parameter(par).isFixed() {
+	if this.theMinimum.UserState().parameter(par).IsFixed() {
 		return nil, errors.New("assertion violation: parameter is fixed")
 	}
-	if this.theMinimum.UserState().parameter(par).isConst() {
+	if this.theMinimum.UserState().parameter(par).IsConst() {
 		return nil, errors.New("assertion violation: parameter is constant")
 	}
 
@@ -67,7 +67,7 @@ func (this *MnMinos) minosWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 		return nil, err
 	}
 
-	return NewMinosErrorWithValues(par, this.theMinimum.UserState().value(par), lo, up), nil
+	return NewMinosErrorWithValues(par, this.theMinimum.UserState().Value(par), lo, up), nil
 }
 
 func (this *MnMinos) Range(par int) (*Point, error) {
@@ -103,7 +103,7 @@ func (this *MnMinos) LowerWithErrDef(par int, errDef float64) (float64, error) {
 /** calculate one side (negative or positive error) of the parameter */
 func (this *MnMinos) LowerWithErrDefMaxCalls(par int, errDef float64, maxcalls int) (float64, error) {
 	var upar *MnUserParameterState = this.theMinimum.UserState()
-	var err float64 = this.theMinimum.UserState().error(par)
+	var err float64 = this.theMinimum.UserState().Error(par)
 	aopt, fnErr := this.LovalWithErrDefMaxCalls(par, errDef, maxcalls)
 	if fnErr != nil {
 		return 0, fnErr
@@ -111,9 +111,9 @@ func (this *MnMinos) LowerWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	if aopt.isValid() {
 		return -1. * err * (1. + aopt.value()), nil
 	} else if aopt.atLimit() {
-		return upar.parameter(par).lowerLimit(), nil
+		return upar.parameter(par).LowerLimit(), nil
 	} else {
-		return upar.value(par), nil
+		return upar.Value(par), nil
 	}
 }
 
@@ -127,7 +127,7 @@ func (this *MnMinos) UpperWithErrDef(par int, errDef float64) (float64, error) {
 
 func (this *MnMinos) UpperWithErrDefMaxCalls(par int, errDef float64, maxcalls int) (float64, error) {
 	var upar *MnUserParameterState = this.theMinimum.UserState()
-	var err float64 = this.theMinimum.UserState().error(par)
+	var err float64 = this.theMinimum.UserState().Error(par)
 	aopt, fnErr := this.UpvalWithErrDefMaxCalls(par, errDef, maxcalls)
 	if fnErr != nil {
 		return 0, fnErr
@@ -135,9 +135,9 @@ func (this *MnMinos) UpperWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	if aopt.isValid() {
 		return err * (1. + aopt.value()), nil
 	} else if aopt.atLimit() {
-		return upar.parameter(par).upperLimit(), nil
+		return upar.parameter(par).UpperLimit(), nil
 	} else {
-		return upar.value(par), nil
+		return upar.Value(par), nil
 	}
 }
 
@@ -154,23 +154,23 @@ func (this *MnMinos) LovalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	if !this.theMinimum.IsValid() {
 		return nil, errors.New("assertion violation: Minimum is Invalid")
 	}
-	if this.theMinimum.UserState().parameter(par).isFixed() {
+	if this.theMinimum.UserState().parameter(par).IsFixed() {
 		return nil, errors.New("assertion violation: parameter is fixed")
 	}
-	if this.theMinimum.UserState().parameter(par).isConst() {
+	if this.theMinimum.UserState().parameter(par).IsConst() {
 		return nil, errors.New("assertion violation: parameter is constant")
 	}
 
 	if maxcalls == 0 {
-		var nvar int = this.theMinimum.UserState().variableParameters()
+		var nvar int = this.theMinimum.UserState().VariableParameters()
 		maxcalls = 2 * (nvar + 1) * (200 + 100*nvar + 5*nvar*nvar)
 	}
 
 	var para []int = []int{par}
 
-	var upar *MnUserParameterState = this.theMinimum.UserState().Clone()
-	var err float64 = upar.error(par)
-	var val float64 = upar.value(par) - err
+	var upar *MnUserParameterState = this.theMinimum.UserState().clone()
+	var err float64 = upar.Error(par)
+	var val float64 = upar.Value(par) - err
 	var xmid []float64 = []float64{val}
 	var xdir []float64 = []float64{-err}
 
@@ -186,12 +186,12 @@ func (this *MnMinos) LovalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 			return nil, err
 		}
 		var xdev float64 = xunit * v
-		var ext int = upar.extOfInt(i)
-		upar.setValue(ext, upar.value(ext)-xdev)
+		var ext int = upar.ExtOfInt(i)
+		upar.SetValue(ext, upar.Value(ext)-xdev)
 	}
 
-	upar.fix(par)
-	upar.setValue(par, val)
+	upar.Fix(par)
+	upar.SetValue(par, val)
 
 	var toler float64 = 0.1
 	var cross *MnFunctionCross = NewMnFunctionCross(this.theFCN, upar, this.theMinimum.Fval(), this.theStrategy, errDef)
@@ -223,22 +223,22 @@ func (this *MnMinos) UpvalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	if !this.theMinimum.IsValid() {
 		return nil, errors.New("assertion violation: Minimum is Invalid")
 	}
-	if this.theMinimum.UserState().parameter(par).isFixed() {
+	if this.theMinimum.UserState().parameter(par).IsFixed() {
 		return nil, errors.New("assertion violation: parameter is fixed")
 	}
-	if this.theMinimum.UserState().parameter(par).isConst() {
+	if this.theMinimum.UserState().parameter(par).IsConst() {
 		return nil, errors.New("assertion violation: parameter is constant")
 	}
 	if maxcalls == 0 {
-		var nvar int = this.theMinimum.UserState().variableParameters()
+		var nvar int = this.theMinimum.UserState().VariableParameters()
 		maxcalls = 2 * (nvar + 1) * (200 + 100*nvar + 5*nvar*nvar)
 	}
 
 	var para []int = []int{par}
 
-	var upar *MnUserParameterState = this.theMinimum.UserState().Clone()
-	var err float64 = upar.error(par)
-	var val float64 = upar.value(par) + err
+	var upar *MnUserParameterState = this.theMinimum.UserState().clone()
+	var err float64 = upar.Error(par)
+	var val float64 = upar.Value(par) + err
 	var xmid []float64 = []float64{val}
 	var xdir []float64 = []float64{err}
 
@@ -254,12 +254,12 @@ func (this *MnMinos) UpvalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 			return nil, err
 		}
 		var xdev float64 = xunit * v
-		var ext int = upar.extOfInt(i)
-		upar.setValue(ext, upar.value(ext)+xdev)
+		var ext int = upar.ExtOfInt(i)
+		upar.SetValue(ext, upar.Value(ext)+xdev)
 	}
 
-	upar.fix(par)
-	upar.setValue(par, val)
+	upar.Fix(par)
+	upar.SetValue(par, val)
 
 	var toler float64 = 0.1
 	var cross *MnFunctionCross = NewMnFunctionCross(this.theFCN, upar, this.theMinimum.Fval(), this.theStrategy, errDef)

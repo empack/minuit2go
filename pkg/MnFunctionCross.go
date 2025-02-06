@@ -26,7 +26,7 @@ func NewMnFunctionCross(fcn FCNBase, state *MnUserParameterState, fval float64, 
 func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tlr float64, maxcalls int) *MnCross {
 	var npar int = len(par)
 	var nfcn int = 0
-	var prec *MnMachinePrecision = this.theState.precision()
+	var prec *MnMachinePrecision = this.theState.Precision()
 
 	var tlf float64 = tlr * this.theErrorDef
 	var tla float64 = tlr
@@ -44,18 +44,18 @@ func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tl
 	var aulim float64 = 100.0
 	for i := 0; i < len(par); i++ {
 		var kex int = par[i]
-		if this.theState.parameter(kex).hasLimits() {
+		if this.theState.parameter(kex).HasLimits() {
 			var zmid float64 = pmid[i]
 			var zdir float64 = pdir[i]
-			if math.Abs(zdir) < this.theState.precision().eps() {
+			if math.Abs(zdir) < this.theState.Precision().eps() {
 				continue
 			}
 
-			if zdir > 0. && this.theState.parameter(kex).hasUpperLimit() {
-				var zlim float64 = this.theState.parameter(kex).upperLimit()
+			if zdir > 0. && this.theState.parameter(kex).HasUpperLimit() {
+				var zlim float64 = this.theState.parameter(kex).UpperLimit()
 				aulim = math.Min(aulim, (zlim-zmid)/zdir)
-			} else if zdir < 0. && this.theState.parameter(kex).hasLowerLimit() {
-				var zlim float64 = this.theState.parameter(kex).lowerLimit()
+			} else if zdir < 0. && this.theState.parameter(kex).HasLowerLimit() {
+				var zlim float64 = this.theState.parameter(kex).LowerLimit()
 				aulim = math.Min(aulim, (zlim-zmid)/zdir)
 			}
 		}
@@ -68,10 +68,10 @@ func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tl
 	var migrad *MnMigrad = NewMnMigrad(this.theFCN, this.theState, NewMnStrategyWithStra(max(0, this.theStrategy.Strategy()-1)))
 
 	for i := 0; i < npar; i++ {
-		migrad.setValue(par[i], pmid[i])
+		migrad.SetValue(par[i], pmid[i])
 	}
 
-	var min0 *FunctionMinimum = migrad.minimize(maxcalls, tlr)
+	min0, _ := migrad.MinimizeWithMaxfcnToler(maxcalls, tlr)
 	nfcn += min0.Nfcn()
 
 	if min0.hasReachedCallLimit() {
@@ -106,10 +106,10 @@ func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tl
 	}
 
 	for i := 0; i < npar; i++ {
-		migrad.setValue(par[i], pmid[i]+(aopt)*pdir[i])
+		migrad.SetValue(par[i], pmid[i]+(aopt)*pdir[i])
 	}
 
-	var min1 *FunctionMinimum = migrad.minimize(maxcalls, tlr)
+	min1, _ := migrad.MinimizeWithMaxfcnToler(maxcalls, tlr)
 	nfcn += min1.Nfcn()
 
 	if min1.hasReachedCallLimit() {
@@ -148,9 +148,9 @@ L300:
 					limset = true
 				}
 				for i := 0; i < npar; i++ {
-					migrad.setValue(par[i], pmid[i]+(aopt)*pdir[i])
+					migrad.SetValue(par[i], pmid[i]+(aopt)*pdir[i])
 				}
-				min1 = migrad.minimize(maxcalls, tlr)
+				min1, _ = migrad.MinimizeWithMaxfcnToler(maxcalls, tlr)
 				nfcn += min1.Nfcn()
 
 				if min1.hasReachedCallLimit() {
@@ -208,9 +208,9 @@ L300:
 			}
 
 			for i := 0; i < npar; i++ {
-				migrad.setValue(par[i], pmid[i]+(aopt)*pdir[i])
+				migrad.SetValue(par[i], pmid[i]+(aopt)*pdir[i])
 			}
-			min2 = migrad.minimize(maxcalls, tlr)
+			min2, _ = migrad.MinimizeWithMaxfcnToler(maxcalls, tlr)
 			nfcn += min2.Nfcn()
 
 			if min2.hasReachedCallLimit() {
@@ -361,7 +361,7 @@ L300:
 		}
 
 		for i := 0; i < npar; i++ {
-			migrad.setValue(par[i], pmid[i]+(aopt)*pdir[i])
+			migrad.SetValue(par[i], pmid[i]+(aopt)*pdir[i])
 		}
 		min2 = migrad.minimize(maxcalls, tlr)
 		nfcn += min2.Nfcn()

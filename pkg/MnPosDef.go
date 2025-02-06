@@ -58,7 +58,7 @@ func (this *mnPosDefStruct) TestError(e *MinimumError, prec *MnMachinePrecision)
 	}
 
 	//   std::cout<<"MnPosDef p: "<<p<<std::endl
-	var eval *MnAlgebraicVector = p.eigenvalues()
+	var eval *MnAlgebraicVector = p.igenvalues()
 	var pmin float64 = eval.get(0)
 	var pmax float64 = eval.get(eval.size() - 1)
 	//   std::cout<<"pmin= "<<pmin<<" pmax= "<<pmax<<std::endl;

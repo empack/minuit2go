@@ -76,7 +76,7 @@ func (this *MnHesse) CalculateWithFcnStateMaxcalls(fcn FCNBase, state *MnUserPar
 		return nil, err
 	}
 	tmp := this.CalculateWithMnfcnStTrafoMaxcalls(mfcn, NewMinimumStateWithGrad(par, NewMinimumError(symmatrix,
-		1.0), gra, state.Edm(), state.Nfcn())), state.trafo(), maxcalls)
+		1.0), gra, state.Edm(), state.Nfcn()), state.trafo(), maxcalls)
 
 	return NewMnuserParamterStateWithStateErrdefTrafo(tmp, errDef, state.trafo()), nil
 }
@@ -110,7 +110,7 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 	}
 
 	// try catch block
-	var tryToCatch
+	var tryToCatch bool
 	x := st.parameters().vec().Clone()
 
 	for i := 0; i < n; i++ {

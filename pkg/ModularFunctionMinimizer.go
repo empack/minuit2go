@@ -13,7 +13,7 @@ func (this *ModularFunctionMinimizer) minimizeWithError(fcn FCNBase, st *MnUserP
 		gc = NewNumerical2PGradientCalculator(mfcn.ParentClass, st.trafo(), strategy)
 	}
 
-	var npar int = st.variableParameters()
+	var npar int = st.VariableParameters()
 	if maxfcn == 0 {
 		maxfcn = 200 + 100*npar + 5*npar*npar
 	}

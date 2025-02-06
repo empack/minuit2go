@@ -46,6 +46,15 @@ func MnGlobalCorrelationCoeffFromAlgebraicSymMatrix(cov *MnAlgebraicSymMatrix) (
 	}, nil
 }
 
+func (this *MnGlobalCorrelationCoeff) clone() *MnGlobalCorrelationCoeff {
+	gcc := &MnGlobalCorrelationCoeff{
+		theGlobalCC: make([]float64, len(this.theGlobalCC)),
+		theValid:    this.theValid,
+	}
+	copy(gcc.theGlobalCC, this.theGlobalCC)
+	return gcc
+}
+
 func (this *MnGlobalCorrelationCoeff) GlobalCC() []float64 {
 	return this.theGlobalCC
 }
@@ -54,5 +63,5 @@ func (this *MnGlobalCorrelationCoeff) IsValid() bool {
 	return this.theValid
 }
 func (this *MnGlobalCorrelationCoeff) ToString() string {
-	return MnPrint.toString(this)
+	return MnPrint.toStringMnGlobalCorrelationCoeff(this)
 }

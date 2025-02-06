@@ -72,7 +72,7 @@ func (this *FunctionMinimum) states() []*MinimumState {
 
 func (this *FunctionMinimum) UserState() *MnUserParameterState {
 	if !this.theUserState.IsValid() {
-		this.theUserState = NewUserParameterStateWith(this.state(), this.ErrorDef(),
+		this.theUserState, _ = NewMnUserParameterStateMsFlUt(this.state(), this.ErrorDef(),
 			this.seed().trafo())
 	}
 
@@ -81,18 +81,18 @@ func (this *FunctionMinimum) UserState() *MnUserParameterState {
 
 func (this *FunctionMinimum) UserParameters() *MnUserParameters {
 	if !this.theUserState.IsValid() {
-		this.theUserState = NewMnUserParameterStateWith(this.state(), this.ErrorDef(), this.seed().Trafo())
+		this.theUserState, _ = NewMnUserParameterStateMsFlUt(this.state(), this.ErrorDef(), this.seed().trafo())
 	}
 
-	return this.theUserState.Parameters()
+	return this.theUserState.parameters()
 }
 
 func (this *FunctionMinimum) UserCovariance() *MnUserCovariance {
 	if !this.theUserState.IsValid() {
-		this.theUserState = NewMnUserParameterStateWith(this.state(), this.ErrorDef(), this.seed().Trafo())
+		this.theUserState, _ = NewMnUserParameterStateMsFlUt(this.state(), this.ErrorDef(), this.seed().trafo())
 	}
 
-	return this.theUserState.Covariance()
+	return this.theUserState.covariance()
 }
 
 func (this *FunctionMinimum) lastState() *MinimumState {
