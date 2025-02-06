@@ -15,7 +15,7 @@ func NewMnHesse() *MnHesse {
 	return &MnHesse{theStrategy: NewMnStrategyWithStra(1)}
 }
 
-func NewMnHesseWithIntStrategy(stra int) *MnHesse {
+func NewMnHesseWithStra(stra int) *MnHesse {
 	return &MnHesse{theStrategy: NewMnStrategyWithStra(stra)}
 }
 
@@ -23,42 +23,50 @@ func NewMnHesseWithStrategy(stra *MnStrategy) *MnHesse {
 	return &MnHesse{theStrategy: stra}
 }
 
-func (this *MnHesse) CalculateWithFcnParErr(fcn FCNBase, par, err []float64) *MnUserParameterState {
-	return this.CalculateWithFcnParErrMaxcalls(fcn, NewMnUserParameterStateWithParErr(par, err), 0)
+func (this *MnHesse) CalculateWithFcnParErr(fcn FCNBase, par, err []float64) (*MnUserParameterState, error) {
+	return this.CalculateWithFcnParErrMaxcalls(fcn, par, err, 0)
 }
 
 func (this *MnHesse) CalculateWithFcnParErrMaxcalls(fcn FCNBase, par, err []float64,
-	maxcalls int) *MnUserParameterState {
-	return this.CalculateWithFcnStateMaxcalls(fcn, NewMnUserParameterStateWithParErr(par, err), maxcalls)
+	maxcalls int) (*MnUserParameterState, error) {
+	return this.CalculateWithFcnStateMaxcalls(fcn, NewUserParamStateFromParamAndErrValues(par, err), maxcalls)
 }
 
 func (this *MnHesse) CalculateWithFcnParCovariance(fcn FCNBase, par []float64,
-	cov *MnUserCovariance) *MnUserParameterState {
+	cov *MnUserCovariance) (*MnUserParameterState, error) {
 	return this.CalculateWithFcnParCovarianceMaxcalls(fcn, par, cov, 0)
 }
 
 func (this *MnHesse) CalculateWithFcnParCovarianceMaxcalls(fcn FCNBase, par []float64, cov *MnUserCovariance,
-	maxcalls int) *MnUserParameterState {
-	return this.CalculateWithFcnStateMaxcalls(fcn, NewUserParameterStateWithParCov(par, cov), maxcalls)
+	maxcalls int) (*MnUserParameterState, error) {
+	state, err := NewMnUserParameterStateFlUc(par, cov)
+	if err != nil {
+		return nil, err
+	}
+	return this.CalculateWithFcnStateMaxcalls(fcn, state, maxcalls)
 }
 
-func (this *MnHesse) CalculateWithFcnPar(fcn FCNBase, par *MnUserParameters) *MnUserParameterState {
+func (this *MnHesse) CalculateWithFcnPar(fcn FCNBase, par *MnUserParameters) (*MnUserParameterState, error) {
 	return this.CalculateWithFcnParMaxcalls(fcn, par, 0)
 }
 
-func (this *MnHesse) CalculateWithFcnParMaxcalls(fcn FCNBase, par *MnuserParameters,
-	maxcalls int) *MnUserParameterState {
-	return this.CalculateWithFcnStateMaxcalls(fcn, NewMnUserParameterStateWithPar(par), maxcalls)
+func (this *MnHesse) CalculateWithFcnParMaxcalls(fcn FCNBase, par *MnUserParameters,
+	maxcalls int) (*MnUserParameterState, error) {
+	return this.CalculateWithFcnStateMaxcalls(fcn, NewUserParameterStateFromUserParameter(par), maxcalls)
 }
 
 func (this *MnHesse) CalculateWithFcnParCovMaxcalls(fcn FCNBase, par *MnUserParameters,
-	cov *MnUserCovariance, maxcalls int) *MnUserParameterState {
-	return this.CalculateWithFcnStateMaxcalls(fcn, NewMnUserParameterStateWithParCov(par, cov), maxcalls)
+	cov *MnUserCovariance, maxcalls int) (*MnUserParameterState, error) {
+	state, err := NewUserParamStateFromUserParamCovariance(par, cov)
+	if err != nil {
+		return nil, err
+	}
+	return this.CalculateWithFcnStateMaxcalls(fcn, state, maxcalls)
 }
 
 func (this *MnHesse) CalculateWithFcnStateMaxcalls(fcn FCNBase, state *MnUserParameterState,
 	maxcalls int) (*MnUserParameterState, error) {
-	errDef := 1.0
+	errDef := 1.0 // FixMe!
 	n := state.VariableParameters()
 	mfcn := NewMnUserFcn(fcn, errDef, state.trafo())
 	x := NewMnAlgebraicVector(n)
@@ -68,17 +76,23 @@ func (this *MnHesse) CalculateWithFcnStateMaxcalls(fcn FCNBase, state *MnUserPar
 	}
 
 	amin := mfcn.valueOf(x)
-	gc := NewNumerical2PGradientCalculator(mfcn, state.trafo(), this.theStrategy)
+	gc := NewNumerical2PGradientCalculator(mfcn.ParentClass, state.trafo(), this.theStrategy)
 	par := NewMinimumParameters(x, amin)
-	gra := gc.GradientWithPar(par)
+	gra, err := gc.Gradient(par)
+	if err != nil {
+		return nil, err
+	}
 	symmatrix, err := NewMnAlgebraicSymMatrix(n)
 	if err != nil {
 		return nil, err
 	}
-	tmp := this.CalculateWithMnfcnStTrafoMaxcalls(mfcn, NewMinimumStateWithGrad(par, NewMinimumError(symmatrix,
+	tmp, err := this.CalculateWithMnfcnStTrafoMaxcalls(mfcn.ParentClass, NewMinimumStateWithGrad(par, NewMinimumError(symmatrix,
 		1.0), gra, state.Edm(), state.Nfcn()), state.trafo(), maxcalls)
+	if err != nil {
+		return nil, err
+	}
 
-	return NewMnuserParamterStateWithStateErrdefTrafo(tmp, errDef, state.trafo()), nil
+	return NewMnUserParameterStateMsFlUt(tmp, errDef, state.trafo())
 }
 
 // TODO: MnHesse.java:76 needs full rewrite here
@@ -89,7 +103,7 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 	aimsag := math.Sqrt(prec.eps2()) * (math.Abs(amin) + mfcn.errorDef())
 	n := st.parameters().vec().size()
 	if maxcalls == 0 {
-		maxcalls = 200 + 100 * n + 5 * n * n
+		maxcalls = 200 + 100*n + 5*n*n
 	}
 
 	vhmat, err := NewMnAlgebraicSymMatrix(n)
@@ -102,8 +116,11 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 	dirin := st.gradient().gstep().Clone()
 	yy := NewMnAlgebraicVector(n)
 	if st.gradient().isAnalytical() {
-		ifc := NewInitialGradientCalculator(fcn, trafo, this.theStrategy)
-		tmp := igc.gradient(st.parameters())
+		igc := NewInitialGradientCalculator(mfcn, trafo, this.theStrategy)
+		tmp, err := igc.gradient(st.parameters())
+		if err != nil {
+			return nil, err
+		}
 		gst = tmp.gstep().Clone()
 		dirin = tmp.gstep().Clone()
 		g2 = tmp.g2().Clone()
@@ -126,12 +143,12 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 
 			var multpy int
 			for multpy = 0; multpy < 5; multpy++ {
-				x.set(i, xtf + d)
+				x.set(i, xtf+d)
 				fs1 = mfcn.valueOf(x)
-				x.set(i, xtf - d)
+				x.set(i, xtf-d)
 				fs2 = mfcn.valueOf(x)
 				x.set(i, xtf)
-				sag = 0.5 * (fs1 + fs2 - 2.0 * amin)
+				sag = 0.5 * (fs1 + fs2 - 2.0*amin)
 				if sag > prec.eps2() {
 					break
 				}
@@ -157,8 +174,8 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 			}
 
 			g2bfor := g2.get(i)
-			g2.set(i, 2.0 * sag / (d * d))
-			grd.set(i, (fs1 - fs2) / (2.0 * d))
+			g2.set(i, 2.0*sag/(d*d))
+			grd.set(i, (fs1-fs2)/(2.0*d))
 			gst.set(i, d)
 			dirin.set(i, d)
 			yy.set(i, fs1)
@@ -171,39 +188,43 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 				d = dmin
 			}
 
-			if math.Abs((d - d) / d) < this.tolerstp() ||math.Abs((g2.get(i) - g2bfor) / g2.get(i)) < this.tolerg2() {
+			if math.Abs((d-d)/d) < this.tolerstp() || math.Abs((g2.get(i)-g2bfor)/g2.get(i)) < this.tolerg2() {
 				break
 			}
 
-			var53 := math.Min(d, 10.5 * d)
-			d = math.Max(var53, 0.1 * d)
+			var53 := math.Min(d, 10.5*d)
+			d = math.Max(var53, 0.1*d)
 		}
 
 		_ = vhmat.set(i, i, g2.get(i))
-		if mfcn.numOfCalls() - st.nfcn() > maxcalls {
+		if mfcn.numOfCalls()-st.nfcn() > maxcalls {
 			// error catch handling
 			// throw new MnHesseFailed("MnHesse: maximum number of allowed function calls exhausted.");
 		}
 	}
 
-	if this.theStrategy.strategy() > 0 {
+	if this.theStrategy.Strategy() > 0 {
 		hgc := NewHessianGradientCalculator(mfcn, trafo, this.theStrategy)
-		gr := hgc.GradientWithGradient(st.parameters(), NewFunctionGradientFromMnAlgebraicVectors(grd, g2, gst))
+		gr, err := hgc.GradientWithGrad(st.parameters(), NewFunctionGradientFromMnAlgebraicVectors(grd, g2, gst))
+		if err != nil {
+			return nil, err
+		}
 		grd = gr.grad()
 	}
 
+	//off-diagonal elements
 	for i := 0; i < n; i++ {
-		x.set(i, x.get(i) + dirin.get(i))
+		x.set(i, x.get(i)+dirin.get(i))
 
 		for j := i + 1; j < n; j++ {
-			x.set(j, x.get(j) + dirin.get(j))
+			x.set(j, x.get(j)+dirin.get(j))
 			fs1 := mfcn.valueOf(x)
 			elem := (fs1 + amin - yy.get(i) - yy.get(j)) / (dirin.get(i) * dirin.get(j))
 			_ = vhmat.set(i, j, elem)
-			x.set(j, x.get(j) - dirin.get(i))
+			x.set(j, x.get(j)-dirin.get(i))
 		}
 
-		x.set(i, x.get(i) - dirin.get(j))
+		x.set(i, x.get(i)-dirin.get(i))
 	}
 
 	tmp := MnPosDef.TestError(NewMinimumError(vhmat, 1.0), prec)
@@ -214,24 +235,22 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 	if failedHesse != nil {
 		// error catch handling
 		// throw new MnHesseFailed("MnHesse: matrix inversion fails!");
-		fmt.Println("MnHesse: matrix inversion fails!")
+		println("MnHesse: matrix inversion fails")
+		tryToCatch = true
 	}
 
 	gr := NewFunctionGradientFromMnAlgebraicVectors(grd, g2, gst)
-	if tmp.isMadePosDef() {
+	if !tryToCatch && tmp.isMadePosDef() {
 		fmt.Println("MnHesse: matrix is invalid!")
 		fmt.Println("MnHesse: matrix is not pos. def.!")
 		fmt.Println("MnHesse: matrix was forced pos. def.")
-		// TODO: MnHesse.java:208 this is tricky
-		return NewMinimumStateWithGrad(st.parameters(), NewMinimumErrorFromMnMadePosDef(vhmat,
-			THIS IS UNKNOWN), gr, st.edm(), mfcn.numOfCalls()), nil
-	} else {
-		e = NewMinimumError(vhmat, 0.0)
-		edm, err := NewVariableMetricEDMEstimator().estimate(gr, err)
+		return NewMinimumStateWithGrad(st.parameters(), NewMinimumErrorFromMnMadePosDef(vhmat, &MnMadePosDef{}), gr, st.edm(), mfcn.numOfCalls()), nil
+	} else if !tryToCatch {
+		e := NewMinimumError(vhmat, 0.0)
+		edm, err := NewVariableMetricEDMEstimator().estimate(gr, e)
 		if err != nil {
 			return nil, err
 		}
-		// TODO: MnHesse.java:223 this is tricky
 		return NewMinimumStateWithGrad(st.parameters(), e, gr, edm, mfcn.numOfCalls()), nil
 	}
 
@@ -253,8 +272,8 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 			}
 
 			// TODO: MnHesse.java:223 this is tricky
-			return NewMinimumStateWithGrad(st.parameters(), NewMinimumErrorFromHesse(vham, THIS IS UNKNOWN),
-				st.gradient(), st.edm(), st.nfcn() + mfcn.numOfCalls()), nil
+			return NewMinimumStateWithGrad(st.parameters(), NewMinimumErrorFromHesse(vhmat, &MnHesseFailed{}),
+				st.gradient(), st.edm(), st.nfcn()+mfcn.numOfCalls()), nil
 		}
 	}
 
@@ -270,5 +289,5 @@ func (this *MnHesse) tolerstp() float64 {
 }
 
 func (this *MnHesse) tolerg2() float64 {
-	return this.theStrategy.hessianG2Tolerance()
+	return this.theStrategy.HessianG2Tolerance()
 }
