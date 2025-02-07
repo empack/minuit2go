@@ -5,6 +5,18 @@ type MnUserFcn struct {
 	ParentClass  *MnFcn
 }
 
+func (this *MnUserFcn) numOfCalls() int {
+	return this.ParentClass.numOfCalls()
+}
+
+func (this *MnUserFcn) errorDef() float64 {
+	return this.ParentClass.theErrorDef
+}
+
+func (this *MnUserFcn) fcn() FCNBase {
+	return this.ParentClass.fcn()
+}
+
 func NewMnUserFcn(fcn FCNBase, errDef float64, trafo *MnUserTransformation) *MnUserFcn {
 	return &MnUserFcn{
 		theTransform: trafo,

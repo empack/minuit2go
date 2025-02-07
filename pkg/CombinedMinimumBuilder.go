@@ -14,7 +14,7 @@ func NewCombinedMinimumBuilder() *CombinedMinimumBuilder {
 	}
 }
 
-func (this *CombinedMinimumBuilder) Minimum(fcn *MnFcn, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
+func (this *CombinedMinimumBuilder) Minimum(fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
 	min, err := this.theVMMinimizer.minimize(fcn, gc, seed, strategy, maxfcn, toler)
 	if err != nil {
 		return nil, err

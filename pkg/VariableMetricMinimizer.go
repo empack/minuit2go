@@ -19,7 +19,7 @@ func (this *VariableMetricMinimizer) minimizeWithError(fcn FCNBase, st *MnUserPa
 	return this.baseImpl.minimizeWithError(fcn, st, strategy, maxfcn, toler, errorDef, useAnalyticalGradient, checkGradient)
 }
 
-func (this *VariableMetricMinimizer) minimize(mfcn *MnFcn, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
+func (this *VariableMetricMinimizer) minimize(mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
 	return this.baseImpl.minimize(mfcn, gc, seed, strategy, maxfcn, toler)
 }
 

@@ -7,7 +7,7 @@ var MnLineSearch = &mnLineSearchStruct{}
 type mnLineSearchStruct struct {
 }
 
-func (this *mnLineSearchStruct) search(fcn *MnFcn, st *MinimumParameters, step *MnAlgebraicVector, gdel float64, prec *MnMachinePrecision) (*MnParabolaPoint, error) {
+func (this *mnLineSearchStruct) search(fcn MnFcnInterface, st *MinimumParameters, step *MnAlgebraicVector, gdel float64, prec *MnMachinePrecision) (*MnParabolaPoint, error) {
 	var overal float64 = 1000.0
 	var undral float64 = -100.0
 	var toler float64 = 0.050

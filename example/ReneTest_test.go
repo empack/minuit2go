@@ -123,7 +123,7 @@ func TestRene(t *testing.T) {
 		//     std::cout<<min<<std::endl;
 		var sbuff2 strings.Builder
 		minuit.MnPrint.PrintFunctionMinimum(&sbuff2, min2)
-		fmt.Printf("%s\n", sbuff2.String())
+		//fmt.Printf("%s\n", sbuff2.String())
 		fmt.Printf("scan parameters: %s\n", scan.Parameters())
 	}
 }

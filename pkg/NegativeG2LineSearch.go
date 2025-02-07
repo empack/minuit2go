@@ -13,7 +13,7 @@ var NegativeG2LineSearch *negativeG2LineSearchStruct = &negativeG2LineSearchStru
 type negativeG2LineSearchStruct struct {
 }
 
-func (this *negativeG2LineSearchStruct) search(fcn *MnFcn, st *MinimumState, gc GradientCalculator, prec *MnMachinePrecision) (*MinimumState, error) {
+func (this *negativeG2LineSearchStruct) search(fcn MnFcnInterface, st *MinimumState, gc GradientCalculator, prec *MnMachinePrecision) (*MinimumState, error) {
 	var negG2 bool = this.hasNegativeG2(st.gradient(), prec)
 	if !negG2 {
 		return st, nil

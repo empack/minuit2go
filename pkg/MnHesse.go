@@ -96,7 +96,7 @@ func (this *MnHesse) CalculateWithFcnStateMaxcalls(fcn FCNBase, state *MnUserPar
 }
 
 // TODO: MnHesse.java:76 needs full rewrite here
-func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumState, trafo *MnUserTransformation,
+func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn MnFcnInterface, st *MinimumState, trafo *MnUserTransformation,
 	maxcalls int) (*MinimumState, error) {
 	prec := trafo.precision()
 	amin := mfcn.valueOf(st.vec())
@@ -157,6 +157,7 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 					if d > 0.5 {
 						// error catch handling
 						// throw new MnHesseFailed("MnHesse: 2nd derivative zero for parameter");
+						return nil, errors.New("MnHesse: 2nd derivative zero for parameter")
 					}
 
 					d *= 10.0
@@ -190,11 +191,14 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 				d = dmin
 			}
 
-			if math.Abs((d-d)/d) < this.tolerstp() || math.Abs((g2.get(i)-g2bfor)/g2.get(i)) < this.tolerg2() {
+			if math.Abs((d-dlast)/d) < this.tolerstp() {
+				break
+			}
+			if math.Abs((g2.get(i)-g2bfor)/g2.get(i)) < this.tolerg2() {
 				break
 			}
 
-			var53 := math.Min(d, 10.5*dlast)
+			var53 := math.Min(d, 10.0*dlast)
 			d = math.Max(var53, 0.1*dlast)
 		}
 
@@ -218,7 +222,7 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 		grd = gr.grad()
 	}
 
-	//off-diagonal elements / results slightly differs from java version
+	//off-diagonal elements / results slightly differs from java version // TODO FIX
 	for i := 0; i < n; i++ {
 		x.set(i, x.get(i)+dirin.get(i))
 
@@ -227,7 +231,7 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 			fs1 := mfcn.valueOf(x)
 			elem := (fs1 + amin - yy.get(i) - yy.get(j)) / (dirin.get(i) * dirin.get(j))
 			_ = vhmat.set(i, j, elem)
-			x.set(j, x.get(j)-dirin.get(i))
+			x.set(j, x.get(j)-dirin.get(j))
 		}
 
 		x.set(i, x.get(i)-dirin.get(i))

@@ -12,7 +12,7 @@ func NewSimplexBuilder() *SimplexBuilder {
 	return &SimplexBuilder{}
 }
 
-func (this *SimplexBuilder) Minimum(mfcn *MnFcn, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, minedm float64) (*FunctionMinimum, error) {
+func (this *SimplexBuilder) Minimum(mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, minedm float64) (*FunctionMinimum, error) {
 	var prec *MnMachinePrecision = seed.precision()
 	var x *MnAlgebraicVector = seed.parameters().vec().Clone()
 	var step *MnAlgebraicVector = MnUtils.MulV(seed.gradient().gstep(), 10.0)

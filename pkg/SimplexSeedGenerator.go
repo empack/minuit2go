@@ -9,7 +9,7 @@ func NewSimplexSeedGenerator() *SimplexSeedGenerator {
 	return &SimplexSeedGenerator{}
 }
 
-func (_ *SimplexSeedGenerator) Generate(fcn *MnFcn, gc GradientCalculator, st *MnUserParameterState, stra *MnStrategy) (*MinimumSeed, error) {
+func (_ *SimplexSeedGenerator) Generate(fcn MnFcnInterface, gc GradientCalculator, st *MnUserParameterState, stra *MnStrategy) (*MinimumSeed, error) {
 	var n int = st.VariableParameters()
 	var prec *MnMachinePrecision = st.Precision()
 

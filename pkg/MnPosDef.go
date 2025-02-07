@@ -76,14 +76,7 @@ func (this *mnPosDefStruct) TestError(e *MinimumError, prec *MnMachinePrecision)
 		if fnErr != nil {
 			return nil, fnErr
 		}
-		fnErr = err.set(i, i, v_+dg)
-		if fnErr != nil {
-			return nil, fnErr
-		}
-		v_, fnErr = err.get(i, i)
-		if fnErr != nil {
-			return nil, fnErr
-		}
+		v_ += dg
 		if v_ < 0. {
 			fnErr = err.set(i, i, 1.)
 			if fnErr != nil {
@@ -91,12 +84,16 @@ func (this *mnPosDefStruct) TestError(e *MinimumError, prec *MnMachinePrecision)
 			}
 		}
 		s.set(i, 1./math.Sqrt(v_))
+		fnErr := err.set(i, i, v_)
+		if fnErr != nil {
+			return nil, fnErr
+		}
 		for j := 0; j <= i; j++ {
-			v_, fnErr = err.get(i, j)
+			v__, fnErr := err.get(i, j)
 			if fnErr != nil {
 				return nil, fnErr
 			}
-			fnErr = p.set(i, j, v_*s.get(i)*s.get(j))
+			fnErr = p.set(i, j, v__*s.get(i)*s.get(j))
 			if fnErr != nil {
 				return nil, fnErr
 			}

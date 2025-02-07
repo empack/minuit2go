@@ -1,5 +1,14 @@
 package minuit
 
+type MnFcnInterface interface {
+	valueOf(v *MnAlgebraicVector) float64
+
+	numOfCalls() int
+
+	errorDef() float64
+
+	fcn() FCNBase
+}
 type MnFcn struct {
 	theFCN      FCNBase
 	theNumCall  int

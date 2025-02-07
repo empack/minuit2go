@@ -19,7 +19,7 @@ func (this *SimplexMinimizer) minimizeWithError(fcn FCNBase, st *MnUserParameter
 	return this.baseImpl.minimizeWithError(fcn, st, strategy, maxfcn, toler, errorDef, useAnalyticalGradient, checkGradient)
 }
 
-func (this *SimplexMinimizer) minimize(mfcn *MnFcn, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
+func (this *SimplexMinimizer) minimize(mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
 	return this.baseImpl.minimize(mfcn, gc, seed, strategy, maxfcn, toler)
 }
 

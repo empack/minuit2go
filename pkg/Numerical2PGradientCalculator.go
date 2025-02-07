@@ -6,12 +6,12 @@ import (
 )
 
 type Numerical2PGradientCalculator struct {
-	theFcn            *MnFcn
+	theFcn            MnFcnInterface
 	theTransformation *MnUserTransformation
 	theStrategy       *MnStrategy
 }
 
-func NewNumerical2PGradientCalculator(fcn *MnFcn, par *MnUserTransformation,
+func NewNumerical2PGradientCalculator(fcn MnFcnInterface, par *MnUserTransformation,
 	stra *MnStrategy) *Numerical2PGradientCalculator {
 	return &Numerical2PGradientCalculator{
 		theFcn:            fcn,
@@ -95,7 +95,7 @@ func (this *Numerical2PGradientCalculator) trafo() *MnUserTransformation {
 	return this.theTransformation
 }
 
-func (this *Numerical2PGradientCalculator) fcn() *MnFcn {
+func (this *Numerical2PGradientCalculator) fcn() MnFcnInterface {
 	return this.theFcn
 }
 

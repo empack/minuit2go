@@ -6,12 +6,12 @@ import (
 )
 
 type InitialGradientCalculator struct {
-	theFcn            *MnFcn
+	theFcn            MnFcnInterface
 	theTransformation *MnUserTransformation
 	theStrategy       *MnStrategy
 }
 
-func NewInitialGradientCalculator(fcn *MnFcn, par *MnUserTransformation, stra *MnStrategy) *InitialGradientCalculator {
+func NewInitialGradientCalculator(fcn MnFcnInterface, par *MnUserTransformation, stra *MnStrategy) *InitialGradientCalculator {
 	return &InitialGradientCalculator{
 		theFcn:            fcn,
 		theTransformation: par,
@@ -79,7 +79,7 @@ func (this *InitialGradientCalculator) trafo() *MnUserTransformation {
 	return this.theTransformation
 }
 
-func (this *InitialGradientCalculator) fcn() *MnFcn {
+func (this *InitialGradientCalculator) fcn() MnFcnInterface {
 	return this.theFcn
 }
 

@@ -18,7 +18,7 @@ func NewVariableMetricBuilder() *VariableMetricBuilder {
 	}
 }
 
-func (this *VariableMetricBuilder) Minimum(fcn *MnFcn, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy,
+func (this *VariableMetricBuilder) Minimum(fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy,
 	maxfcn int,
 	edmval float64) (*FunctionMinimum, error) {
 	fmin, err := this.minimum(fcn, gc, seed, maxfcn, edmval)
@@ -41,7 +41,7 @@ func (this *VariableMetricBuilder) Minimum(fcn *MnFcn, gc GradientCalculator, se
 	return fmin, nil
 }
 
-func (this *VariableMetricBuilder) minimum(fcn *MnFcn, gc GradientCalculator, seed *MinimumSeed, maxfcn int,
+func (this *VariableMetricBuilder) minimum(fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, maxfcn int,
 	edmval float64) (*FunctionMinimum, error) {
 	edmval *= 1.0e-4
 	if seed.parameters().vec().size() == 0 {

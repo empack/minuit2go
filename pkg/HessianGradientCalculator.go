@@ -6,12 +6,12 @@ import (
 )
 
 type HessianGradientCalculator struct {
-	theFcn            *MnFcn
+	theFcn            MnFcnInterface
 	theTransformation *MnUserTransformation
 	theStrategy       *MnStrategy
 }
 
-func NewHessianGradientCalculator(fcn *MnFcn, par *MnUserTransformation, stra *MnStrategy) *HessianGradientCalculator {
+func NewHessianGradientCalculator(fcn MnFcnInterface, par *MnUserTransformation, stra *MnStrategy) *HessianGradientCalculator {
 	return &HessianGradientCalculator{
 		theFcn:            fcn,
 		theTransformation: par,
@@ -103,7 +103,7 @@ func (this *HessianGradientCalculator) deltaGradient(par *MinimumParameters, gra
 	return NewPair[*FunctionGradient, *MnAlgebraicVector](NewFunctionGradientFromMnAlgebraicVectors(grd, g2, gstep), dgrd), nil
 }
 
-func (this *HessianGradientCalculator) fcn() *MnFcn {
+func (this *HessianGradientCalculator) fcn() MnFcnInterface {
 	return this.theFcn
 }
 

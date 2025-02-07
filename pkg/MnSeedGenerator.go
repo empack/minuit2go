@@ -13,7 +13,7 @@ func NewMnSeedGenerator() *MnSeedGenerator {
 	return &MnSeedGenerator{}
 }
 
-func (this *MnSeedGenerator) Generate(fcn *MnFcn, gc GradientCalculator, st *MnUserParameterState, stra *MnStrategy) (*MinimumSeed, error) {
+func (this *MnSeedGenerator) Generate(fcn MnFcnInterface, gc GradientCalculator, st *MnUserParameterState, stra *MnStrategy) (*MinimumSeed, error) {
 	var n int = st.VariableParameters()
 	var prec *MnMachinePrecision = st.Precision()
 

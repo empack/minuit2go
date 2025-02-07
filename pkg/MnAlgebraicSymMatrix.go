@@ -166,147 +166,146 @@ func (this *MnAlgebraicSymMatrix) eigenvalues() (*MnAlgebraicVector, error) {
 	}
 }
 
-func (this *MnAlgebraicSymMatrix) mneigen(a []float64, ndima, n, mits int, work []float64, precis float64) int {
-	m := 0
-	a_dim1 := ndima
-	// unused: a_offset := 1 + ndima*1
-	ifault := 1
-	i__ := n
-	i__1 := n
+func (this *MnAlgebraicSymMatrix) mneigen(a []float64, ndima, n, mits int, work []float64, precis float64) int { /* System generated locals */
+	var a_dim1, i__1, i__2, i__3 int
 
-	for i1 := 2; i1 <= i__1; i1++ {
-		l := i__ - 2
-		f := a[i__+(i__-1)*a_dim1]
-		gl := 0.0
+	/* Local variables */
+	var b, c__, f, h__ float64
+	var i__, j, k, l, m int
+	var r__, s float64
+	var i0, i1, j1, m1, n1 int
+	var hh, gl, pr, pt float64
+
+	/* PRECIS is the machine precision EPSMAC */
+	/* Parameter adjustments */
+	a_dim1 = ndima
+
+	/* Function Body */
+	var ifault int = 1
+
+	i__ = n
+	i__1 = n
+	for i1 = 2; i1 <= i__1; i1++ {
+		l = i__ - 2
+		f = a[i__+(i__-1)*a_dim1]
+		gl = 0.
+
 		if l >= 1 {
-			i__2 := l
-			for k := 1; k <= i__2; k++ {
-				r__1 := a[i__+k*a_dim1]
+			i__2 = l
+			for k = 1; k <= i__2; k++ {
+				/* Computing 2nd power */
+				var r__1 float64 = a[i__+k*a_dim1]
 				gl += r__1 * r__1
 			}
 		}
-
-		h__ := gl + f*f
-		if gl <= 1.0e-35 {
-			work[i__] = 0.0
+		/* Computing 2nd power */
+		h__ = gl + f*f
+		if gl <= 1e-35 {
+			work[i__] = 0.
 			work[n+i__] = f
 		} else {
 			l++
+
 			gl = math.Sqrt(h__)
-			if f >= 0.0 {
+
+			if f >= 0. {
 				gl = -gl
 			}
 
 			work[n+i__] = gl
 			h__ -= f * gl
 			a[i__+(i__-1)*a_dim1] = f - gl
-			f = 0.0
-			i__2 := l
-
-			for j := 1; j <= i__2; j++ {
+			f = 0.
+			i__2 = l
+			for j = 1; j <= i__2; j++ {
 				a[j+i__*a_dim1] = a[i__+j*a_dim1] / h__
-				gl = 0.0
-				i__3 := j
-
-				for k := 1; k <= i__3; k++ {
-					gl += a[j+k*a_dim1] * a[i__+k+a_dim1]
+				gl = 0.
+				i__3 = j
+				for k = 1; k <= i__3; k++ {
+					gl += a[j+k*a_dim1] * a[i__+k*a_dim1]
 				}
 
 				if j < l {
-					j1 := j + 1
+					j1 = j + 1
 					i__3 = l
-
-					for var85 := j1; var85 <= i__3; var85++ {
-						gl += a[var85+j*a_dim1] * a[i__+var85*a_dim1]
+					for k = j1; k <= i__3; k++ {
+						gl += a[k+j*a_dim1] * a[i__+k*a_dim1]
 					}
 				}
-
 				work[n+j] = gl / h__
 				f += gl * a[j+i__*a_dim1]
 			}
-
-			hh := f / (h__ + h__)
+			hh = f / (h__ + h__)
 			i__2 = l
-
-			for var78 := 1; var78 <= i__2; var78++ {
-				f = a[i__+var78*a_dim1]
-				gl = work[n+var78] - hh*f
-				work[n+var78] = gl
-				i__3 := var78
-
-				for k := 1; k <= i__3; k++ {
-					a[var78+k*a_dim1] = a[var78+k*a_dim1] - f*work[n+k]
+			for j = 1; j <= i__2; j++ {
+				f = a[i__+j*a_dim1]
+				gl = work[n+j] - hh*f
+				work[n+j] = gl
+				i__3 = j
+				for k = 1; k <= i__3; k++ {
+					a[j+k*a_dim1] = a[j+k*a_dim1] - f*work[n+k] - gl*a[i__+k*a_dim1]
 				}
 			}
-
 			work[i__] = h__
 		}
-
 		i__--
 	}
-
-	work[1] = 0.0
-	work[n+1] = 0.0
+	work[1] = 0.
+	work[n+1] = 0.
 	i__1 = n
+	for i__ = 1; i__ <= i__1; i__++ {
+		l = i__ - 1
 
-	for var73 := 1; var73 <= i__1; var73++ {
-		l := var73 - 1
-		if work[var73] != 0.0 && l != 0 {
-			i__3 := l
-
-			for j := 1; j <= i__3; j++ {
-				gl := 0.0
-				i__2 := l
-
-				for k := 1; k <= i__2; k++ {
-					gl += a[var73+k*a_dim1] * a[k+j*a_dim1]
-				}
-
+		if work[i__] != 0. && l != 0 {
+			i__3 = l
+			for j = 1; j <= i__3; j++ {
+				gl = 0.
 				i__2 = l
-
-				for var88 := 1; var88 <= i__2; var88++ {
-					a[var88+j*a_dim1] -= gl * a[var88+var73*a_dim1]
+				for k = 1; k <= i__2; k++ {
+					gl += a[i__+k*a_dim1] * a[k+j*a_dim1]
+				}
+				i__2 = l
+				for k = 1; k <= i__2; k++ {
+					a[k+j*a_dim1] -= gl * a[k+i__*a_dim1]
 				}
 			}
 		}
+		work[i__] = a[i__+i__*a_dim1]
+		a[i__+i__*a_dim1] = 1.
 
-		work[var73] = a[var73+var73*a_dim1]
-		a[var73+var73*a_dim1] = 1.0
 		if l != 0 {
-			i__2 := l
-
-			for j := 1; j <= i__2; j++ {
-				a[var73+j*a_dim1] = 0.0
-				a[j+var73*a_dim1] = 0.0
+			i__2 = l
+			for j = 1; j <= i__2; j++ {
+				a[i__+j*a_dim1] = 0.
+				a[j+i__*a_dim1] = 0.
 			}
 		}
+
 	}
 
-	n1 := n - 1
+	n1 = n - 1
 	i__1 = n
-
-	for var74 := 2; var74 <= i__1; var74++ {
-		i0 := n + var74 - 1
+	for i__ = 2; i__ <= i__1; i__++ {
+		i0 = n + i__ - 1
 		work[i0] = work[i0+1]
 	}
-
-	work[n+n] = 0.0
-	b := 0.0
-	f := 0.0
+	work[n+n] = 0.
+	b = 0.
+	f = 0.
 	i__1 = n
+	for l = 1; l <= i__1; l++ {
+		j = 0
+		h__ = precis * (math.Abs(work[l]) + math.Abs(work[n+l]))
 
-	for l := 1; l <= i__1; l++ {
-		j := 0
-		h__ := precis * (math.Abs(work[l]) + math.Abs(work[n+l]))
 		if b < h__ {
 			b = h__
 		}
 
-		i__2 := n
-
-		for m1 := l; m1 >= i__2; m1++ {
+		i__2 = n
+		for m1 = l; m1 <= i__2; m1++ {
 			m = m1
-			if math.Abs(work[n+m1]) <= b {
+
+			if math.Abs(work[n+m]) <= b {
 				break
 			}
 		}
@@ -316,58 +315,56 @@ func (this *MnAlgebraicSymMatrix) mneigen(a []float64, ndima, n, mits int, work 
 				if j == mits {
 					return ifault
 				}
-				j++
 
-				pt := (work[l+1] - work[l]) / (work[n+l] * 2.0)
-				r__ := math.Sqrt(pt*pt + 1.0)
-				pr := pt + r__
-				if pt < 0.0 {
+				j++
+				pt = (work[l+1] - work[l]) / (work[n+l] * 2.)
+				r__ = math.Sqrt(pt*pt + 1.)
+				pr = pt + r__
+
+				if pt < 0. {
 					pr = pt - r__
 				}
 
 				h__ = work[l] - work[n+l]/pr
 				i__2 = n
-
-				for var75 := l; var75 < i__2; var75++ {
-					work[var75] -= h__
+				for i__ = l; i__ <= i__2; i__++ {
+					work[i__] -= h__
 				}
-
 				f += h__
 				pt = work[m]
-				c__ := 1.0
-				s := 0.0
-				var98 := m - 1
+				c__ = 1.
+				s = 0.
+				m1 = m - 1
 				i__ = m
-				i__2 = var98
+				i__2 = m1
+				for i1 = l; i1 <= i__2; i1++ {
+					j = i__
+					i__--
+					gl = c__ * work[n+i__]
+					h__ = c__ * pt
 
-				for var96 := l; var96 <= i__2; var96++ {
-					j = i__ - 1 //i__--
-					gl := c__ * pt
 					if math.Abs(pt) < math.Abs(work[n+i__]) {
 						c__ = pt / work[n+i__]
-						r__ = math.Sqrt(c__*c__ + 1.0)
+						r__ = math.Sqrt(c__*c__ + 1.)
 						work[n+j] = s * work[n+i__] * r__
-						s = 1.0 / r__
+						s = 1. / r__
 						c__ /= r__
 					} else {
 						c__ = work[n+i__] / pt
-						r__ = math.Sqrt(c__*c__ + 1.0)
+						r__ = math.Sqrt(c__*c__ + 1.)
 						work[n+j] = s * pt * r__
 						s = c__ / r__
-						c__ = 1.0 / r__
+						c__ = 1. / r__
 					}
-
 					pt = c__*work[i__] - s*gl
 					work[j] = h__ + s*(c__*gl+s*work[i__])
-					i__3 := n
-
-					for k := 1; j <= i__3; k++ {
+					i__3 = n
+					for k = 1; k <= i__3; k++ {
 						h__ = a[k+j*a_dim1]
 						a[k+j*a_dim1] = s*a[k+i__*a_dim1] + c__*h__
 						a[k+i__*a_dim1] = c__*a[k+i__*a_dim1] - s*h__
 					}
 				}
-
 				work[n+l] = s * pt
 				work[l] = c__ * pt
 
@@ -376,41 +373,36 @@ func (this *MnAlgebraicSymMatrix) mneigen(a []float64, ndima, n, mits int, work 
 				}
 			}
 		}
-
 		work[l] += f
 	}
-
 	i__1 = n1
-
-	for var77 := 1; var77 <= i__1; var77++ {
-		k := var77
-		pt := work[var77]
-		var97 := var77 + 1
-		i__3 := n
-
-		for j := var97; j <= i__3; j++ {
+	for i__ = 1; i__ <= i__1; i__++ {
+		k = i__
+		pt = work[i__]
+		i1 = i__ + 1
+		i__3 = n
+		for j = i1; j <= i__3; j++ {
 			if work[j] < pt {
 				k = j
 				pt = work[j]
 			}
 		}
 
-		if k != var77 {
-			work[k] = work[var77]
-			work[var77] = pt
+		if k != i__ {
+			work[k] = work[i__]
+			work[i__] = pt
 			i__3 = n
-
-			for var83 := 1; var83 <= i__3; var83++ {
-				pt = a[var83+var77*a_dim1]
-				a[var83+var77*a_dim1] = a[var83+k*a_dim1]
-				a[var83+k*a_dim1] = pt
+			for j = 1; j <= i__3; j++ {
+				pt = a[j+i__*a_dim1]
+				a[j+i__*a_dim1] = a[j+k*a_dim1]
+				a[j+k*a_dim1] = pt
 			}
 		}
 	}
-
 	ifault = 0
+
 	return ifault
-}
+} /* mneig_ */
 
 func (this *MnAlgebraicSymMatrix) data() []float64 {
 	return this.theData
