@@ -34,6 +34,7 @@ func NewMnUserTransformation() *MnUserTransformation {
 		theUpperLimTrafo:  NewSqrtUpParameterTransformation(),
 		theLowerLimTrafo:  NewSqrtLowParameterTransformation(),
 		theCache:          make([]float64, 0),
+		nameMap:           make(map[string]int),
 	}
 }
 
@@ -46,6 +47,7 @@ func (this *MnUserTransformation) Clone() *MnUserTransformation {
 		theUpperLimTrafo:  NewSqrtUpParameterTransformation(),
 		theLowerLimTrafo:  NewSqrtLowParameterTransformation(),
 		theCache:          slices.Clone(this.theCache),
+		nameMap:           make(map[string]int),
 	}
 }
 
@@ -71,9 +73,10 @@ func NewMnUserTransformationFrom(par, err []float64) *MnUserTransformation {
 		theDoubleLimTrafo: NewSinParameterTransformation(),
 		theUpperLimTrafo:  NewSqrtUpParameterTransformation(),
 		theLowerLimTrafo:  NewSqrtLowParameterTransformation(),
-		theParameters:     make([]*MinuitParameter, len(par)),
-		theExtOfInt:       make([]int, len(par)),
+		theParameters:     make([]*MinuitParameter, 0, len(par)),
+		theExtOfInt:       make([]int, 0, len(par)),
 		theCache:          make([]float64, 0),
+		nameMap:           make(map[string]int),
 	}
 	for i := 0; i < len(par); i++ {
 		res.addFree(fmt.Sprintf("i+%d", i), par[i], err[i])

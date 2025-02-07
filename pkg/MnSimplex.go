@@ -70,6 +70,6 @@ func NewMnSimplexWithParameterStateStrategy(fcn FCNBase, par *MnUserParameterSta
 	}
 }
 
-func (this *MnSimplex) Minimizer() *ModularFunctionMinimizer {
-	return this.theMinimizer.ModularFunctionMinimizer
+func (this *MnSimplex) Minimizer() ModularFunctionMinimizerInterface {
+	return this.theMinimizer
 }
