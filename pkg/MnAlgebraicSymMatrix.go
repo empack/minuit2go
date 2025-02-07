@@ -123,6 +123,7 @@ func (this *MnAlgebraicSymMatrix) get(row, col int) (float64, error) {
 func (this *MnAlgebraicSymMatrix) set(row, col int, value float64) error {
 	if row < this.theNRow && col < this.theNRow {
 		this.theData[this.theIndex(row, col)] = value
+		return nil
 	}
 
 	return errors.New("array index out of bounds")
@@ -139,7 +140,7 @@ func (this *MnAlgebraicSymMatrix) Clone() *MnAlgebraicSymMatrix {
 func (this *MnAlgebraicSymMatrix) eigenvalues() (*MnAlgebraicVector, error) {
 	nrow := this.theNRow
 	tmp := make([]float64, (nrow+1)*(nrow+1))
-	work := make([]float64, 1+2+nrow)
+	work := make([]float64, 1+2*nrow)
 
 	for i := 0; i < nrow; i++ {
 		for j := 0; j <= i; j++ {
@@ -147,7 +148,7 @@ func (this *MnAlgebraicSymMatrix) eigenvalues() (*MnAlgebraicVector, error) {
 			if err != nil {
 				return nil, err
 			}
-			tmp[1+i+(i+j)*nrow] = v
+			tmp[1+i+((1+j)*nrow)] = v
 			tmp[(1+i)*nrow+1+j] = v
 		}
 	}
@@ -370,7 +371,7 @@ func (this *MnAlgebraicSymMatrix) mneigen(a []float64, ndima, n, mits int, work 
 				work[n+l] = s * pt
 				work[l] = c__ * pt
 
-				if !(math.Abs(work[n+l]) <= b) {
+				if math.Abs(work[n+l]) <= b {
 					break
 				}
 			}
