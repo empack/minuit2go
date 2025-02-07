@@ -171,6 +171,7 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 			if multpy >= 5 {
 				// error catch handling
 				// throw new MnHesseFailed("MnHesse: 2nd derivative zero for parameter");
+				return nil, errors.New("MnHesse: 2nd derivative zero for parameter")
 			}
 
 			g2bfor := g2.get(i)
@@ -179,6 +180,7 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 			gst.set(i, d)
 			dirin.set(i, d)
 			yy.set(i, fs1)
+			dlast := d
 			d = math.Sqrt(2.0 * aimsag / math.Abs(g2.get(i)))
 			if trafo.parameter(i).HasLimits() {
 				d = math.Min(0.5, d)
@@ -192,14 +194,18 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 				break
 			}
 
-			var53 := math.Min(d, 10.5*d)
-			d = math.Max(var53, 0.1*d)
+			var53 := math.Min(d, 10.5*dlast)
+			d = math.Max(var53, 0.1*dlast)
 		}
 
-		_ = vhmat.set(i, i, g2.get(i))
+		fnErr := vhmat.set(i, i, g2.get(i))
+		if fnErr != nil {
+			return nil, fnErr
+		}
 		if mfcn.numOfCalls()-st.nfcn() > maxcalls {
 			// error catch handling
 			// throw new MnHesseFailed("MnHesse: maximum number of allowed function calls exhausted.");
+			return nil, errors.New("MnHesse: maximum number of allowed function calls exhausted.")
 		}
 	}
 
@@ -212,7 +218,7 @@ func (this *MnHesse) CalculateWithMnfcnStTrafoMaxcalls(mfcn *MnFcn, st *MinimumS
 		grd = gr.grad()
 	}
 
-	//off-diagonal elements
+	//off-diagonal elements / results slightly differs from java version
 	for i := 0; i < n; i++ {
 		x.set(i, x.get(i)+dirin.get(i))
 

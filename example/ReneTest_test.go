@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"slices"
+	"strings"
 	"testing"
 
 	minuit "github.com/empack/minuit2go/pkg"
@@ -90,8 +91,9 @@ func TestRene(t *testing.T) {
 			t.Fatalf("minimize failed with:\n %s\n", err.Error())
 		}
 	}
-
-	fmt.Printf("minimum: %v\n", min)
+	var sbuff strings.Builder
+	minuit.MnPrint.PrintFunctionMinimum(&sbuff, min)
+	fmt.Printf("minimum: %s\n", sbuff.String())
 
 	{
 		var params []float64 = []float64{1, 1, 1, 1, 1, 1}
@@ -119,7 +121,9 @@ func TestRene(t *testing.T) {
 			t.Fatalf("minimize failed with:\n %s\n", err.Error())
 		}
 		//     std::cout<<min<<std::endl;
-		fmt.Printf("%v\n", min2)
+		var sbuff2 strings.Builder
+		minuit.MnPrint.PrintFunctionMinimum(&sbuff2, min2)
+		fmt.Printf("%s\n", sbuff2.String())
 		fmt.Printf("scan parameters: %s\n", scan.Parameters())
 	}
 }
