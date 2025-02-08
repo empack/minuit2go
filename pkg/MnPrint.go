@@ -21,7 +21,7 @@ func (this *MnPrintStruct) PrintMnAlgebraicVector(builder *strings.Builder, vec 
 	nrow := vec.size()
 
 	for i := 0; i < nrow; i++ {
-		builder.WriteString(fmt.Sprintf("%g", vec.get(i)))
+		builder.WriteString(fmt.Sprintf("%g ", vec.get(i)))
 	}
 
 	builder.WriteString("\n")
@@ -68,14 +68,19 @@ func (this *MnPrintStruct) PrintFunctionMinimum(builder *strings.Builder, min *F
 	builder.WriteString(fmt.Sprintf("# of function calls: %d\n", min.Nfcn()))
 	builder.WriteString(fmt.Sprintf("minimum function value: %g\n", min.Fval()))
 	builder.WriteString(fmt.Sprintf("minimum edm: %g\n", min.Edm()))
-	builder.WriteString(fmt.Sprintf("minimum internal state vector: %g\n", min.parameters().vec()))
+	builder.WriteString("minimum internal state vector: ")
+	this.PrintMnAlgebraicVector(builder, min.parameters().vec())
+	builder.WriteString("\n")
 	if min.hasValidCovariance() {
 		builder.WriteString(fmt.Sprintf("minimum internal covariance matrix:  %s\n", min.error().matrix()))
 	}
 
-	builder.WriteString(fmt.Sprintf("%g\n", min.UserParameters()))
-	builder.WriteString(fmt.Sprintf("%g\n", min.UserCovariance()))
-	builder.WriteString(fmt.Sprintf("%g\n", min.UserState().globalCC()))
+	//builder.WriteString(fmt.Sprintf("%g\n", min.UserParameters()))
+	this.PrintMnUserParameters(builder, min.UserParameters())
+	//builder.WriteString(fmt.Sprintf("%g\n", min.UserCovariance()))
+	this.PrintMnUserCovariance(builder, min.UserCovariance())
+	//builder.WriteString(fmt.Sprintf("%g\n", min.UserState().globalCC()))
+	this.PrintMnGlobalCorrelationCoeff(builder, min.UserState().globalCC())
 	if !min.IsValid() {
 		builder.WriteString("WARNING: FunctionMinimum is invalid.\n")
 	}

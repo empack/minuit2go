@@ -79,7 +79,7 @@ func NewMnUserTransformationFrom(par, err []float64) *MnUserTransformation {
 		nameMap:           make(map[string]int),
 	}
 	for i := 0; i < len(par); i++ {
-		res.addFree(fmt.Sprintf("i+%d", i), par[i], err[i])
+		res.addFree(fmt.Sprintf("p%d", i), par[i], err[i])
 	}
 	return res
 }

@@ -94,7 +94,7 @@ func TestRene(t *testing.T) {
 	var sbuff strings.Builder
 	minuit.MnPrint.PrintFunctionMinimum(&sbuff, min)
 	fmt.Printf("minimum: %s\n", sbuff.String())
-
+	fmt.Print("\n----- TEST1 COMPLETED -----\n\n")
 	{
 		var params []float64 = []float64{1, 1, 1, 1, 1, 1}
 		var error []float64 = []float64{1, 1, 1, 1, 1, 1}
@@ -126,4 +126,5 @@ func TestRene(t *testing.T) {
 		//fmt.Printf("%s\n", sbuff2.String())
 		fmt.Printf("scan parameters: %s\n", scan.Parameters())
 	}
+	fmt.Print("\n----- TEST2 COMPLETED -----\n\n")
 }
