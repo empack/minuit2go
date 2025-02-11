@@ -124,7 +124,7 @@ func (this *MnUserTransformation) parameter(index int) *MinuitParameter {
 
 /** addFree add free parameter */
 func (this *MnUserTransformation) addFree(name string, val, err float64) error {
-	if _, ok := this.nameMap[name]; ok == true {
+	if _, ok := this.nameMap[name]; ok {
 		return errors.New("IllegalArgumentException: duplicate name:" + name)
 	}
 	this.nameMap[name] = len(this.theParameters)
@@ -136,7 +136,7 @@ func (this *MnUserTransformation) addFree(name string, val, err float64) error {
 
 /** add limited parameter */
 func (this *MnUserTransformation) addLimited(name string, val, err, low, up float64) error {
-	if _, ok := this.nameMap[name]; ok == true {
+	if _, ok := this.nameMap[name]; ok {
 		return errors.New("IllegalArgumentException: duplicate name:" + name)
 	}
 	this.nameMap[name] = len(this.theParameters)
@@ -152,7 +152,7 @@ func (this *MnUserTransformation) addLimited(name string, val, err, low, up floa
 
 /** add  parameter */
 func (this *MnUserTransformation) add(name string, val float64) error {
-	if _, ok := this.nameMap[name]; ok == true {
+	if _, ok := this.nameMap[name]; ok {
 		return errors.New("IllegalArgumentException: duplicate name:" + name)
 	}
 	this.nameMap[name] = len(this.theParameters)

@@ -11,6 +11,14 @@ type MnStrategy struct {
 	theHessGradNCyc int
 }
 
+type StrategyType = int
+
+const (
+	FastStrategy StrategyType = iota
+	StandardStrategy
+	PreciseStrategy
+)
+
 func NewMnStrategy() *MnStrategy {
 	return &MnStrategy{
 		theStrategy:     1,
@@ -24,8 +32,8 @@ func NewMnStrategy() *MnStrategy {
 	}
 }
 
-func NewMnStrategyWithStra(stra int) *MnStrategy {
-	if stra == 0 {
+func NewMnStrategyWithStra(stra StrategyType) *MnStrategy {
+	if stra == FastStrategy {
 		return &MnStrategy{
 			theStrategy:     0,
 			theGradNCyc:     2,
@@ -36,18 +44,9 @@ func NewMnStrategyWithStra(stra int) *MnStrategy {
 			theHessTlrG2:    0.1,
 			theHessGradNCyc: 1,
 		}
-	} else if stra == 1 {
-		return &MnStrategy{
-			theStrategy:     1,
-			theGradNCyc:     3,
-			theGradTlrStp:   0.3,
-			theGradTlr:      0.05,
-			theHessNCyc:     5,
-			theHessTlrStp:   0.3,
-			theHessTlrG2:    0.05,
-			theHessGradNCyc: 2,
-		}
-	} else {
+	}
+
+	if stra == PreciseStrategy {
 		return &MnStrategy{
 			theStrategy:     2,
 			theGradNCyc:     5,
@@ -59,6 +58,8 @@ func NewMnStrategyWithStra(stra int) *MnStrategy {
 			theHessGradNCyc: 6,
 		}
 	}
+
+	return NewMnStrategy()
 }
 
 func (this *MnStrategy) Strategy() int {

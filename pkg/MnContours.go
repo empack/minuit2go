@@ -17,7 +17,7 @@ func NewMnContours(fcn FCNBase, min *FunctionMinimum) *MnContours {
 }
 
 /** construct from FCN + minimum + strategy */
-func NewMnContoursWithStra(fcn FCNBase, min *FunctionMinimum, stra int) *MnContours {
+func NewMnContoursWithStra(fcn FCNBase, min *FunctionMinimum, stra StrategyType) *MnContours {
 	return NewMnContoursWithStrategy(fcn, min, NewMnStrategyWithStra(stra))
 }
 

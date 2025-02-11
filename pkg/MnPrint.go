@@ -40,14 +40,14 @@ func (this *MnPrintStruct) PrintMnAlgebraicSymMatrix(builder *strings.Builder, m
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			m, _ := matrix.get(i, j)
-			builder.WriteString(fmt.Sprintf("%10g", m))
+			builder.WriteString(fmt.Sprintf("%10g ", m))
 		}
 
 		builder.WriteString("\n")
 	}
 }
 
-func (this *MnPrintStruct) toStringFunctionMinimum(min *FunctionMinimum) string {
+func (this *MnPrintStruct) ToStringFunctionMinimum(min *FunctionMinimum) string {
 	var builder strings.Builder
 	this.PrintFunctionMinimum(&builder, min)
 	return builder.String()

@@ -3,7 +3,7 @@ package minuit
 import "errors"
 
 var (
-	DEFAULT_STRATEGY = 1
+	DEFAULT_STRATEGY = StandardStrategy
 	DEFAULT_MAXFCN   = 0
 	DEFAULT_TOLER    = 0.1
 )

@@ -32,7 +32,6 @@ func (p *MnUserParameters) Clone() *MnUserParameters {
 /* private MnUserParameters(MnUserParameters other){
 	theTransformation = other.theTransformation.clone();
 } */
-
 func (p *MnUserParameters) Trafo() *MnUserTransformation {
 	return p.TheTransformation
 }
@@ -55,67 +54,46 @@ func (p *MnUserParameters) Errors() []float64 {
 	return p.TheTransformation.errors()
 }
 
-/** access to single parameter */
-/* MinuitParameter parameter(int index)
-   {
-      return theTransformation.parameter(index);
-   } */
+// access to single parameter
 func (p *MnUserParameters) Parameter(index int) *MinuitParameter {
 	return p.TheTransformation.parameter(index)
 }
 
-/**
- * Add free parameter name, value, error
- * <p>
- * When adding parameters, MINUIT assigns indices to each parameter which will be
- * the same as in the double[] in the FCNBase.valueOf(). That means the
- * first parameter the user adds gets index 0, the second index 1, and so on. When
- * calculating the function value inside FCN, MINUIT will call FCNBase.valueOf() with
- * the elements at their respective positions.
- */
-
+// Add free parameter name, value, error
+//
+// When adding parameters, MINUIT assigns indices to each parameter which will be
+// the same as in the double[] in the FCNBase.valueOf(). That means the
+// first parameter the user adds gets index 0, the second index 1, and so on. When
+// calculating the function value inside FCN, MINUIT will call FCNBase.valueOf() with
+// the elements at their respective positions.
 func (p *MnUserParameters) AddFree(name string, val, err float64) {
 	p.TheTransformation.addFree(name, val, err)
 }
 
-/**
- * Add limited parameter name, value, lower bound, upper bound
- */
-
+// Add limited parameter name, value, lower bound, upper bound
 func (p *MnUserParameters) AddLimited(name string, val, err, low, up float64) {
 	p.TheTransformation.addLimited(name, val, err, low, up)
 }
 
-/**
- * Add const parameter name, value
- */
-
+// Add const parameter name, value
 func (p *MnUserParameters) Add(name string, val float64) {
 	p.TheTransformation.add(name, val)
 }
 
-/// interaction via external number of parameter
-/**
- * Fixes the specified parameter (so that the minimizer will no longer vary it)
- */
-
+//	interaction via external number of parameter
+//
+// Fixes the specified parameter (so that the minimizer will no longer vary it)
 func (p *MnUserParameters) Fix(index int) {
 	p.TheTransformation.fix(index)
 }
 
-/**
- * Releases the specified parameter (so that the minimizer can vary it)
- */
-
+// Releases the specified parameter (so that the minimizer can vary it)
 func (p *MnUserParameters) Release(index int) {
 	p.TheTransformation.release(index)
 }
 
-/**
- * Set the value of parameter. The parameter in
- * question may be variable, fixed, or constant, but must be defined.
- */
-
+// Set the value of parameter. The parameter in
+// question may be variable, fixed, or constant, but must be defined.
 func (p *MnUserParameters) SetValue(index int, val float64) {
 	p.TheTransformation.setValue(index, val)
 }
@@ -124,10 +102,7 @@ func (p *MnUserParameters) SetError(index int, err float64) {
 	p.TheTransformation.setError(index, err)
 }
 
-/**
- * Set the lower and upper bound on the specified variable.
- */
-
+// Set the lower and upper bound on the specified variable.
 func (p *MnUserParameters) SetLimits(index int, low, up float64) {
 	p.TheTransformation.setLimits(index, low, up)
 }
@@ -152,28 +127,20 @@ func (p *MnUserParameters) Error(index int) float64 {
 	return p.TheTransformation.error(index)
 }
 
-/// interaction via name of parameter
-/**
- * Fixes the specified parameter (so that the minimizer will no longer vary it)
- */
-
+// interaction via name of parameter
+//
+// Fixes the specified parameter (so that the minimizer will no longer vary it)
 func (p *MnUserParameters) FixByName(name string) {
 	p.TheTransformation.fixByName(name)
 }
 
-/**
- * Releases the specified parameter (so that the minimizer can vary it)
- */
-
+// Releases the specified parameter (so that the minimizer can vary it)
 func (p *MnUserParameters) ReleaseByName(name string) {
 	p.TheTransformation.releaseByName(name)
 }
 
-/**
- * Set the value of parameter. The parameter in
- * question may be variable, fixed, or constant, but must be defined.
- */
-
+// Set the value of parameter. The parameter in
+// question may be variable, fixed, or constant, but must be defined.
 func (p *MnUserParameters) SetValueByName(name string, val float64) {
 	p.TheTransformation.setValueByName(name, val)
 }
@@ -182,10 +149,7 @@ func (p *MnUserParameters) SetErrorByName(name string, err float64) {
 	p.TheTransformation.setErrorByName(name, err)
 }
 
-/**
- * Set the lower and upper bound on the specified variable.
- */
-
+// Set the lower and upper bound on the specified variable.
 func (p *MnUserParameters) SetLimitsByName(name string, low, up float64) {
 	p.TheTransformation.setLimitsByName(name, low, up)
 }
