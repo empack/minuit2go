@@ -443,9 +443,9 @@ func NewMnUserParameterStateMsFlUt(st *MinimumState, up float64, trafo *MnUserTr
 			var err float64
 			if st.hasCovariance() {
 				hessII, _ := st.error().invHessian().get(i, i)
-				math.Sqrt(2 * up * hessII)
+				err = math.Sqrt(2 * up * hessII)
 			} else {
-				st.parameters().dirin().get(i)
+				err = st.parameters().dirin().get(i)
 			}
 			ups.AddStFlFl(ipar.Name(), st.vec().get(i), err)
 		}
