@@ -48,55 +48,47 @@ func (this *MnAlgebraicSymMatrix) invert() error {
 		}
 
 		for i := 0; i < nrow; i++ {
-			for j := 0; j < nrow; j++ {
-				var10000 := this.theData
-				var10001 := this.theIndex(i, j)
-				var10000[var10001] *= s[i] * s[j]
+			for j := i; j < nrow; j++ {
+				this.theData[this.theIndex(i, j)] *= s[i] * s[j]
 			}
 		}
 
 		for i := 0; i < nrow; i++ {
-			k := i
-			if this.theData[this.theIndex(i, i)] == 0.0 {
+			var k int = i
+			if this.theData[this.theIndex(k, k)] == 0. {
 				return errors.New("matrix inversion failed")
 			}
-
-			q[i] = 1.0 / this.theData[this.theIndex(i, i)]
-			pp[i] = 1.0
-			this.theData[this.theIndex(i, i)] = 0.0
-			kp1 := i + 1
-			if i != 0 {
+			q[k] = 1. / this.theData[this.theIndex(k, k)]
+			pp[k] = 1.
+			this.theData[this.theIndex(k, k)] = 0.
+			var kp1 int = k + 1
+			if k != 0 {
 				for j := 0; j < k; j++ {
-					index := this.theIndex(j, k)
+					var index int = this.theIndex(j, k)
 					pp[j] = this.theData[index]
 					q[j] = this.theData[index] * q[k]
-					this.theData[index] = 0.0
+					this.theData[index] = 0.
 				}
 			}
-
 			if k != nrow-1 {
 				for j := kp1; j < nrow; j++ {
-					index := this.theIndex(k, j)
+					var index int = this.theIndex(k, j)
 					pp[j] = this.theData[index]
-					q[j] = this.theData[index] * q[k]
-					this.theData[index] = 0.0
+					q[j] = -this.theData[index] * q[k]
+					this.theData[index] = 0.
+				}
+			}
+			for j := 0; j < nrow; j++ {
+				for k = j; k < nrow; k++ {
+					this.theData[this.theIndex(j, k)] += pp[j] * q[k]
 				}
 			}
 
-			for j := 0; j < nrow; j++ {
-				for var16 := j; var16 < nrow; var16++ {
-					var21 := this.theData
-					var23 := this.theIndex(j, var16)
-					var21[var23] += pp[j] * q[var16]
-				}
-			}
 		}
 
 		for j := 0; j < nrow; j++ {
 			for k := j; k < nrow; k++ {
-				var22 := this.theData
-				var24 := this.theIndex(j, k)
-				var22[var24] *= s[j] * s[k]
+				this.theData[this.theIndex(j, k)] *= s[j] * s[k]
 			}
 		}
 	}
