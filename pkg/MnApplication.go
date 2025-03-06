@@ -7,8 +7,8 @@ import (
 
 var (
 	DEFAULT_STRATEGY = StandardStrategy
-	DEFAULT_MAXFCN   = 1_000_000
-	DEFAULT_TOLER    = 0.0001
+	DEFAULT_MAXFCN   = 0
+	DEFAULT_TOLER    = 0.1
 )
 
 type MnApplicationInterface interface {
