@@ -7,6 +7,8 @@ type FunctionMinimum struct {
 	theAboveMaxEdm      bool
 	theReachedCallLimit bool
 	theUserState        *MnUserParameterState
+
+	Stopped bool
 }
 
 func NewFunctionMinimumWithSeedUp(seed *MinimumSeed, up float64) *FunctionMinimum {
@@ -46,8 +48,7 @@ func NewFunctionMinimumWithSeedStatesUpReachedCallLimit(seed *MinimumSeed, state
 	}
 }
 
-func NewFunctionMinimumWithSeedStatesUpAboveMaxEdm(seed *MinimumSeed, states []*MinimumState,
-	up float64) *FunctionMinimum {
+func NewFunctionMinimumWithSeedStatesUpAboveMaxEdm(seed *MinimumSeed, states []*MinimumState, up float64) *FunctionMinimum {
 	return &FunctionMinimum{
 		theSeed:             seed,
 		theStates:           states,
@@ -55,6 +56,16 @@ func NewFunctionMinimumWithSeedStatesUpAboveMaxEdm(seed *MinimumSeed, states []*
 		theAboveMaxEdm:      true,
 		theReachedCallLimit: false,
 		theUserState:        NewMnUserParameterState(),
+	}
+}
+
+func NewFunctionMinimumWithSeedStatesUpStopped(seed *MinimumSeed, states []*MinimumState, up float64) *FunctionMinimum {
+	return &FunctionMinimum{
+		theSeed:      seed,
+		theStates:    states,
+		theErrorDef:  up,
+		theUserState: NewMnUserParameterState(),
+		Stopped:      true,
 	}
 }
 
@@ -132,7 +143,7 @@ func (this *FunctionMinimum) ErrorDef() float64 {
 }
 
 func (this *FunctionMinimum) IsValid() bool {
-	return this.state().isValid() && !this.isAboveMaxEdm() && !this.hasReachedCallLimit()
+	return this.state().isValid() && !this.isAboveMaxEdm() && !this.hasReachedCallLimit() && !this.Stopped
 }
 
 func (this *FunctionMinimum) hasValidParameters() bool {

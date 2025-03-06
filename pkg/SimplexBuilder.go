@@ -38,6 +38,7 @@ func (this *SimplexBuilder) Minimum(ctx context.Context, mfcn MnFcnInterface, gc
 	var aming float64 = seed.fval()
 
 	for i := 0; i < n; i++ {
+		log.Println("SimplexBuilder.Minimum: i=", i)
 		var dmin float64 = 8. * prec.eps2() * (math.Abs(x.get(i)) + prec.eps2())
 		if step.get(i) < dmin {
 			step.set(i, dmin)
@@ -56,103 +57,112 @@ func (this *SimplexBuilder) Minimum(ctx context.Context, mfcn MnFcnInterface, gc
 		x.set(i, x.get(i)-step.get(i))
 	}
 	var simplex *SimplexParameters = NewSimplexParameters(simpl, jh, jl)
+	ok := true
 
-	for ok := true; ok; ok = ok {
-		amin = simplex.get(jl).First
-		jl = simplex.jl()
-		jh = simplex.jh()
-		var pbar *MnAlgebraicVector = NewMnAlgebraicVector(n)
-		for i := 0; i < n+1; i++ {
-			if i == jh {
-				continue
-			}
-			if res, err := MnUtils.AddV(pbar, MnUtils.MulV(simplex.get(i).Second, wg)); err == nil {
-				pbar = res
-			} else {
-				return nil, err
-			}
-		}
+	stopped := false
 
-		pstar, err := MnUtils.SubV(MnUtils.MulV(pbar, 1.+alpha), MnUtils.MulV(simplex.get(jh).Second, alpha))
-		if err != nil {
-			return nil, err
-		}
-		var ystar float64 = mfcn.valueOf(pstar)
-
-		if ystar > amin {
-			if ystar < simplex.get(jh).First {
-				simplex.update(ystar, pstar)
-				if jh != simplex.jh() {
+	for ok {
+		select {
+		case <-ctx.Done():
+			stopped = true
+			ok = false
+		default:
+			amin = simplex.get(jl).First
+			jl = simplex.jl()
+			jh = simplex.jh()
+			var pbar *MnAlgebraicVector = NewMnAlgebraicVector(n)
+			for i := 0; i < n+1; i++ {
+				if i == jh {
 					continue
 				}
+				if res, err := MnUtils.AddV(pbar, MnUtils.MulV(simplex.get(i).Second, wg)); err == nil {
+					pbar = res
+				} else {
+					return nil, err
+				}
 			}
-			pstst, err := MnUtils.AddV(MnUtils.MulV(simplex.get(jh).Second, beta), MnUtils.MulV(pbar, 1.-beta))
+
+			pstar, err := MnUtils.SubV(MnUtils.MulV(pbar, 1.+alpha), MnUtils.MulV(simplex.get(jh).Second, alpha))
+			if err != nil {
+				return nil, err
+			}
+			var ystar float64 = mfcn.valueOf(pstar)
+
+			if ystar > amin {
+				if ystar < simplex.get(jh).First {
+					simplex.update(ystar, pstar)
+					if jh != simplex.jh() {
+						continue
+					}
+				}
+				pstst, err := MnUtils.AddV(MnUtils.MulV(simplex.get(jh).Second, beta), MnUtils.MulV(pbar, 1.-beta))
+				if err != nil {
+					return nil, err
+				}
+				var ystst float64 = mfcn.valueOf(pstst)
+				if ystst > simplex.get(jh).First {
+					break
+				}
+				simplex.update(ystst, pstst)
+				continue
+			}
+
+			pstst, err := MnUtils.AddV(MnUtils.MulV(pstar, gamma), MnUtils.MulV(pbar, 1.-gamma))
 			if err != nil {
 				return nil, err
 			}
 			var ystst float64 = mfcn.valueOf(pstst)
-			if ystst > simplex.get(jh).First {
-				break
-			}
-			simplex.update(ystst, pstst)
-			continue
-		}
 
-		pstst, err := MnUtils.AddV(MnUtils.MulV(pstar, gamma), MnUtils.MulV(pbar, 1.-gamma))
-		if err != nil {
-			return nil, err
-		}
-		var ystst float64 = mfcn.valueOf(pstst)
-
-		var y1 float64 = (ystar - simplex.get(jh).First) * rho2
-		var y2 float64 = (ystst - simplex.get(jh).First) * rho1
-		var rho float64 = 0.5 * (rho2*y1 - rho1*y2) / (y1 - y2)
-		if rho < rhomin {
-			if ystst < simplex.get(jl).First {
-				simplex.update(ystst, pstst)
-			} else {
-				simplex.update(ystar, pstar)
+			var y1 float64 = (ystar - simplex.get(jh).First) * rho2
+			var y2 float64 = (ystst - simplex.get(jh).First) * rho1
+			var rho float64 = 0.5 * (rho2*y1 - rho1*y2) / (y1 - y2)
+			if rho < rhomin {
+				if ystst < simplex.get(jl).First {
+					simplex.update(ystst, pstst)
+				} else {
+					simplex.update(ystar, pstar)
+				}
+				continue
 			}
-			continue
-		}
-		if rho > rhomax {
-			rho = rhomax
-		}
-		prho, err := MnUtils.AddV(MnUtils.MulV(pbar, rho), MnUtils.MulV(simplex.get(jh).Second, 1.0-rho))
-		if err != nil {
-			return nil, err
-		}
-		var yrho float64 = mfcn.valueOf(prho)
-		if yrho < simplex.get(jl).First && yrho < ystst {
-			simplex.update(yrho, prho)
-			continue
-		}
-		if ystst < simplex.get(jl).First {
-			simplex.update(ystst, pstst)
-			continue
-		}
-		if yrho > simplex.get(jl).First {
-			if ystst < simplex.get(jl).First {
-				simplex.update(ystst, pstst)
-			} else {
-				simplex.update(ystar, pstar)
+			if rho > rhomax {
+				rho = rhomax
 			}
-			continue
-		}
-		if ystar > simplex.get(jh).First {
-			pstst, err = MnUtils.AddV(MnUtils.MulV(simplex.get(jh).Second, beta), MnUtils.MulV(pbar, 1-beta))
+			prho, err := MnUtils.AddV(MnUtils.MulV(pbar, rho), MnUtils.MulV(simplex.get(jh).Second, 1.0-rho))
 			if err != nil {
 				return nil, err
 			}
-			ystst = mfcn.valueOf(pstst)
-			if ystst > simplex.get(jh).First {
-				break
+			var yrho float64 = mfcn.valueOf(prho)
+			if yrho < simplex.get(jl).First && yrho < ystst {
+				simplex.update(yrho, prho)
+				continue
 			}
-			simplex.update(ystst, pstst)
-		}
+			if ystst < simplex.get(jl).First {
+				simplex.update(ystst, pstst)
+				continue
+			}
+			if yrho > simplex.get(jl).First {
+				if ystst < simplex.get(jl).First {
+					simplex.update(ystst, pstst)
+				} else {
+					simplex.update(ystar, pstar)
+				}
+				continue
+			}
+			if ystar > simplex.get(jh).First {
+				pstst, err = MnUtils.AddV(MnUtils.MulV(simplex.get(jh).Second, beta), MnUtils.MulV(pbar, 1-beta))
+				if err != nil {
+					return nil, err
+				}
+				ystst = mfcn.valueOf(pstst)
+				if ystst > simplex.get(jh).First {
+					break
+				}
+				simplex.update(ystst, pstst)
+			}
 
-		// replacement for do while loop
-		ok = simplex.edm() > minedm && mfcn.numOfCalls() < maxfcn
+			// replacement for do while loop
+			ok = simplex.edm() > minedm && mfcn.numOfCalls() < maxfcn
+		}
 	}
 
 	amin = simplex.get(jl).First
@@ -188,6 +198,11 @@ func (this *SimplexBuilder) Minimum(ctx context.Context, mfcn MnFcnInterface, gc
 	}
 	var states []*MinimumState = make([]*MinimumState, 0, 1)
 	states = append(states, st)
+
+	if stopped {
+		log.Println("SimplexBuilder: stopped")
+		return NewFunctionMinimumWithSeedStatesUpStopped(seed, states, mfcn.errorDef()), nil
+	}
 
 	if mfcn.numOfCalls() > maxfcn {
 		log.Println("Simplex did not converge, #fcn calls exhausted.")

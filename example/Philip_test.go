@@ -20,6 +20,7 @@ func NewRosenbrockFcn() *RosenbrockFcn {
 
 // ValueOf implementiert die Rosenbrock-Funktion: f(x,y) = (1-x)² + 100(y-x²)²
 func (r *RosenbrockFcn) ValueOf(par []float64) float64 {
+	//log.Println("ValueOf", par)
 	x := par[0]
 	y := par[1]
 
@@ -44,17 +45,27 @@ func TestRosenbrock(t *testing.T) {
 	// Migrad Minimierung
 	log.Println("start migrad")
 
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		time.Sleep(1 * time.Second)
+		log.Println("still running2")
+		cancel()
+	}()
+
 	migrad := minuit.NewMnMigradWithParametersStra(theFCN, upar, minuit.PreciseStrategy)
-	min, err := migrad.MinimizeWithMaxfcn(context.TODO(), 10000)
+	min, err := migrad.MinimizeWithMaxfcn(ctx, 10000)
 	if err != nil {
 		t.Fatalf("minimize failed with:\n %s\n", err.Error())
 	}
 
+	log.Println("migrad done")
+
 	// Falls die erste Minimierung nicht erfolgreich war, versuche es mit höherer Strategie
-	if !min.IsValid() {
+	if !min.IsValid() && !min.Stopped {
 		println("FM is invalid, try with strategy = 2.")
 		migrad2 := minuit.NewMnMigradWithParameterStateStrategy(theFCN, min.UserState(), minuit.NewMnStrategyWithStra(2))
-		min, err = migrad2.Minimize(context.TODO())
+		min, err = migrad2.Minimize(ctx)
 		if err != nil {
 			t.Fatalf("minimize failed with:\n %s\n", err.Error())
 		}

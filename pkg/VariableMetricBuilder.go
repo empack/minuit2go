@@ -19,9 +19,7 @@ func NewVariableMetricBuilder() *VariableMetricBuilder {
 	}
 }
 
-func (this *VariableMetricBuilder) Minimum(ctx context.Context, fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy,
-	maxfcn int,
-	edmval float64) (*FunctionMinimum, error) {
+func (this *VariableMetricBuilder) Minimum(ctx context.Context, fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, edmval float64) (*FunctionMinimum, error) {
 	fmin, err := this.minimum(ctx, fcn, gc, seed, maxfcn, edmval)
 	if err != nil {
 		return nil, err
@@ -61,66 +59,61 @@ func (this *VariableMetricBuilder) minimum(ctx context.Context, fcn MnFcnInterfa
 		result = append(result, seed.state())
 		edm *= 1.0 + 3.0*seed.error().dcovar()
 
+	outer:
 		for {
-			s0 := result[(len(result) - 1)]
-			mvsm, err := MnUtils.MulVSM(s0.error().invHessian(), s0.gradient().vec())
-			if err != nil {
-				return nil, err
-			}
-			step := MnUtils.MulV(mvsm, -1.0)
-			gdel, err := MnUtils.InnerProduct(step, s0.gradient().grad())
-			if err != nil {
-				return nil, err
-			}
-			if gdel > 0.0 {
-				fmt.Println("VariableMetricBuilder: matrix not pos.def")
-				fmt.Printf("gdel > 0: %f\n", gdel)
-				s0, err = MnPosDef.TestState(s0, prec)
+			select {
+			case <-ctx.Done():
+				fmt.Println("VariableMetricBuilder: stopped")
+				return NewFunctionMinimumWithSeedStatesUpStopped(seed, result, fcn.errorDef()), nil
+			default:
+				s0 := result[(len(result) - 1)]
+				mvsm, err := MnUtils.MulVSM(s0.error().invHessian(), s0.gradient().vec())
 				if err != nil {
 					return nil, err
 				}
-				mvsm, err = MnUtils.MulVSM(s0.error().invHessian(), s0.gradient().vec())
+				step := MnUtils.MulV(mvsm, -1.0)
+				gdel, err := MnUtils.InnerProduct(step, s0.gradient().grad())
 				if err != nil {
 					return nil, err
 				}
-				step = MnUtils.MulV(mvsm, -1.0)
-				gdel, err = MnUtils.InnerProduct(step, s0.gradient().grad())
-				if err != nil {
-					return nil, err
-				}
-				fmt.Printf("gdel: %f", gdel)
 				if gdel > 0.0 {
-					result = append(result, s0)
-					return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
+					fmt.Println("VariableMetricBuilder: matrix not pos.def")
+					fmt.Printf("gdel > 0: %f\n", gdel)
+					s0, err = MnPosDef.TestState(s0, prec)
+					if err != nil {
+						return nil, err
+					}
+					mvsm, err = MnUtils.MulVSM(s0.error().invHessian(), s0.gradient().vec())
+					if err != nil {
+						return nil, err
+					}
+					step = MnUtils.MulV(mvsm, -1.0)
+					gdel, err = MnUtils.InnerProduct(step, s0.gradient().grad())
+					if err != nil {
+						return nil, err
+					}
+					fmt.Printf("gdel: %f", gdel)
+					if gdel > 0.0 {
+						result = append(result, s0)
+						return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
+					}
 				}
-			}
 
-			pp, err := MnLineSearch.search(fcn, s0.parameters(), step, gdel, prec)
-			if err != nil {
-				return nil, err
-			}
-			if math.Abs(pp.y()-s0.fval()) < prec.eps() {
-				fmt.Println("VariableMetricBuilder: no improvement")
-				break
-			}
+				pp, err := MnLineSearch.search(fcn, s0.parameters(), step, gdel, prec)
+				if err != nil {
+					return nil, err
+				}
+				if math.Abs(pp.y()-s0.fval()) < prec.eps() {
+					fmt.Println("VariableMetricBuilder: no improvement")
+					break outer
+				}
 
-			added, err := MnUtils.AddV(s0.vec(), MnUtils.MulV(step, pp.x()))
-			if err != nil {
-				return nil, err
-			}
-			p := NewMinimumParameters(added, pp.y())
-			g, err := gc.GradientWithGrad(p, s0.gradient())
-			if err != nil {
-				return nil, err
-			}
-			edm, err = this.estimator().estimate(g, s0.error())
-			if err != nil {
-				return nil, err
-			}
-			if edm < 0.0 {
-				fmt.Println("VariableMetricBuilder: matrix not pos.def")
-				fmt.Println("edm < 0")
-				s0, err = MnPosDef.TestState(s0, prec)
+				added, err := MnUtils.AddV(s0.vec(), MnUtils.MulV(step, pp.x()))
+				if err != nil {
+					return nil, err
+				}
+				p := NewMinimumParameters(added, pp.y())
+				g, err := gc.GradientWithGrad(p, s0.gradient())
 				if err != nil {
 					return nil, err
 				}
@@ -129,19 +122,31 @@ func (this *VariableMetricBuilder) minimum(ctx context.Context, fcn MnFcnInterfa
 					return nil, err
 				}
 				if edm < 0.0 {
-					result = append(result, s0)
-					return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
+					fmt.Println("VariableMetricBuilder: matrix not pos.def")
+					fmt.Println("edm < 0")
+					s0, err = MnPosDef.TestState(s0, prec)
+					if err != nil {
+						return nil, err
+					}
+					edm, err = this.estimator().estimate(g, s0.error())
+					if err != nil {
+						return nil, err
+					}
+					if edm < 0.0 {
+						result = append(result, s0)
+						return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
+					}
 				}
-			}
 
-			e, err := this.errorUpdator().Update(s0, p, g)
-			if err != nil {
-				return nil, err
-			}
-			result = append(result, NewMinimumStateWithGrad(p, e, g, edm, fcn.numOfCalls()))
-			edm *= 1.0 + 3.0*e.dcovar()
-			if !(edm > edmval && fcn.numOfCalls() < maxfcn) {
-				break
+				e, err := this.errorUpdator().Update(s0, p, g)
+				if err != nil {
+					return nil, err
+				}
+				result = append(result, NewMinimumStateWithGrad(p, e, g, edm, fcn.numOfCalls()))
+				edm *= 1.0 + 3.0*e.dcovar()
+				if !(edm > edmval && fcn.numOfCalls() < maxfcn) {
+					break outer
+				}
 			}
 		}
 
@@ -162,7 +167,6 @@ func (this *VariableMetricBuilder) minimum(ctx context.Context, fcn MnFcnInterfa
 		} else {
 			return NewFunctionMinimumWithSeedStatesUp(seed, result, fcn.errorDef()), nil
 		}
-
 	}
 }
 
