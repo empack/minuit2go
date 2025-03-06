@@ -1,17 +1,20 @@
 package minuit
 
-import "errors"
+import (
+	"context"
+	"errors"
+)
 
 var (
 	DEFAULT_STRATEGY = StandardStrategy
-	DEFAULT_MAXFCN   = 0
-	DEFAULT_TOLER    = 0.1
+	DEFAULT_MAXFCN   = 1_000_000
+	DEFAULT_TOLER    = 0.0001
 )
 
 type MnApplicationInterface interface {
-	Minimize() (*FunctionMinimum, error)
-	MinimizeWithMaxfcn(maxfcn int) (*FunctionMinimum, error)
-	MinimizeWithMaxfcnToler(maxfcn int, toler float64) (*FunctionMinimum, error)
+	Minimize(ctx context.Context) (*FunctionMinimum, error)
+	MinimizeWithMaxfcn(ctx context.Context, maxfcn int) (*FunctionMinimum, error)
+	MinimizeWithMaxfcnToler(ctx context.Context, maxfcn int, toler float64) (*FunctionMinimum, error)
 
 	Minimizer() ModularFunctionMinimizerInterface
 
@@ -143,15 +146,15 @@ func NewMnApplicationWithFcnStateStraNfcn(fcn FCNBase, state *MnUserParameterSta
 	}
 }
 
-func (this *MnApplication) Minimize() (*FunctionMinimum, error) {
-	return this.MinimizeWithMaxfcn(DEFAULT_MAXFCN)
+func (this *MnApplication) Minimize(ctx context.Context) (*FunctionMinimum, error) {
+	return this.MinimizeWithMaxfcn(ctx, DEFAULT_MAXFCN)
 }
 
-func (this *MnApplication) MinimizeWithMaxfcn(maxfcn int) (*FunctionMinimum, error) {
-	return this.MinimizeWithMaxfcnToler(maxfcn, DEFAULT_TOLER)
+func (this *MnApplication) MinimizeWithMaxfcn(ctx context.Context, maxfcn int) (*FunctionMinimum, error) {
+	return this.MinimizeWithMaxfcnToler(ctx, maxfcn, DEFAULT_TOLER)
 }
 
-func (this *MnApplication) MinimizeWithMaxfcnToler(maxfcn int, toler float64) (*FunctionMinimum, error) {
+func (this *MnApplication) MinimizeWithMaxfcnToler(ctx context.Context, maxfcn int, toler float64) (*FunctionMinimum, error) {
 	if !this.theState.IsValid() {
 		return nil, errors.New("invalid state")
 	} else {
@@ -160,7 +163,7 @@ func (this *MnApplication) MinimizeWithMaxfcnToler(maxfcn int, toler float64) (*
 			maxfcn = 200 + 100*npar + 5*npar*npar
 		}
 
-		min, fnErr := this.super.Minimizer().minimizeWithError(this.theFCN, this.theState, this.theStrategy, maxfcn, toler,
+		min, fnErr := this.super.Minimizer().minimizeWithError(ctx, this.theFCN, this.theState, this.theStrategy, maxfcn, toler,
 			this.theErrorDef, this.useAnalyticalDerivatives, this.checkAnalyticalDerivatives)
 		if fnErr != nil {
 			return nil, fnErr

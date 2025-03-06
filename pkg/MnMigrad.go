@@ -1,5 +1,7 @@
 package minuit
 
+import "context"
+
 // MnMigrad
 /*
  * MnMigrad provides minimization of the function by the method of MIGRAD, the most
@@ -15,16 +17,16 @@ type MnMigrad struct {
 	theMinimizer *VariableMetricMinimizer
 }
 
-func (this *MnMigrad) Minimize() (*FunctionMinimum, error) {
-	return this.baseImpl.Minimize()
+func (this *MnMigrad) Minimize(ctx context.Context) (*FunctionMinimum, error) {
+	return this.baseImpl.Minimize(ctx)
 }
 
-func (this *MnMigrad) MinimizeWithMaxfcn(maxfcn int) (*FunctionMinimum, error) {
-	return this.baseImpl.MinimizeWithMaxfcn(maxfcn)
+func (this *MnMigrad) MinimizeWithMaxfcn(ctx context.Context, maxfcn int) (*FunctionMinimum, error) {
+	return this.baseImpl.MinimizeWithMaxfcn(ctx, maxfcn)
 }
 
-func (this *MnMigrad) MinimizeWithMaxfcnToler(maxfcn int, toler float64) (*FunctionMinimum, error) {
-	return this.baseImpl.MinimizeWithMaxfcnToler(maxfcn, toler)
+func (this *MnMigrad) MinimizeWithMaxfcnToler(ctx context.Context, maxfcn int, toler float64) (*FunctionMinimum, error) {
+	return this.baseImpl.MinimizeWithMaxfcnToler(ctx, maxfcn, toler)
 }
 
 func (this *MnMigrad) Precision() *MnMachinePrecision {

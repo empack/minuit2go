@@ -1,6 +1,9 @@
 package minuit
 
-import "log"
+import (
+	"context"
+	"log"
+)
 
 type CombinedMinimumBuilder struct {
 	theVMMinimizer      *VariableMetricMinimizer
@@ -14,8 +17,9 @@ func NewCombinedMinimumBuilder() *CombinedMinimumBuilder {
 	}
 }
 
-func (this *CombinedMinimumBuilder) Minimum(fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
-	min, err := this.theVMMinimizer.minimize(fcn, gc, seed, strategy, maxfcn, toler)
+// TODO: ADD BREAKPOINT
+func (this *CombinedMinimumBuilder) Minimum(ctx context.Context, fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
+	min, err := this.theVMMinimizer.minimize(ctx, fcn, gc, seed, strategy, maxfcn, toler)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +27,7 @@ func (this *CombinedMinimumBuilder) Minimum(fcn MnFcnInterface, gc GradientCalcu
 	if !min.IsValid() {
 		log.Println("CombinedMinimumBuilder: migrad method fails, will try with simplex method first.")
 		var str *MnStrategy = NewMnStrategyWithStra(2)
-		min1, err := this.theSimplexMinimizer.minimize(fcn, gc, seed, str, maxfcn, toler)
+		min1, err := this.theSimplexMinimizer.minimize(ctx, fcn, gc, seed, str, maxfcn, toler)
 		if err != nil {
 			return nil, err
 		}
@@ -36,7 +40,7 @@ func (this *CombinedMinimumBuilder) Minimum(fcn MnFcnInterface, gc GradientCalcu
 			return nil, err
 		}
 
-		min2, err := this.theVMMinimizer.minimize(fcn, gc, seed1, str, maxfcn, toler)
+		min2, err := this.theVMMinimizer.minimize(ctx, fcn, gc, seed1, str, maxfcn, toler)
 		if err != nil {
 			return nil, err
 		}

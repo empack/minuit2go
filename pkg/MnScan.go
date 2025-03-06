@@ -1,20 +1,22 @@
 package minuit
 
+import "context"
+
 type MnScan struct {
 	theMinimizer *ScanMinimizer
 	baseImpl     *MnApplication
 }
 
-func (this *MnScan) Minimize() (*FunctionMinimum, error) {
-	return this.baseImpl.Minimize()
+func (this *MnScan) Minimize(ctx context.Context) (*FunctionMinimum, error) {
+	return this.baseImpl.Minimize(ctx)
 }
 
-func (this *MnScan) MinimizeWithMaxfcn(maxfcn int) (*FunctionMinimum, error) {
-	return this.baseImpl.MinimizeWithMaxfcn(maxfcn)
+func (this *MnScan) MinimizeWithMaxfcn(ctx context.Context, maxfcn int) (*FunctionMinimum, error) {
+	return this.baseImpl.MinimizeWithMaxfcn(ctx, maxfcn)
 }
 
-func (this *MnScan) MinimizeWithMaxfcnToler(maxfcn int, toler float64) (*FunctionMinimum, error) {
-	return this.baseImpl.MinimizeWithMaxfcnToler(maxfcn, toler)
+func (this *MnScan) MinimizeWithMaxfcnToler(ctx context.Context, maxfcn int, toler float64) (*FunctionMinimum, error) {
+	return this.baseImpl.MinimizeWithMaxfcnToler(ctx, maxfcn, toler)
 }
 
 func (this *MnScan) Precision() *MnMachinePrecision {
@@ -193,48 +195,48 @@ func (this *MnScan) ErrorDef() float64 {
 	return this.baseImpl.ErrorDef()
 }
 
-func NewMnScan(fcn FCNBase, par []float64, err []float64) *MnScan {
-	return NewMnScanWithStrategy(fcn, par, err, DEFAULT_STRATEGY)
+func NewMnScan(ctx context.Context, fcn FCNBase, par []float64, err []float64) *MnScan {
+	return NewMnScanWithStrategy(ctx, fcn, par, err, DEFAULT_STRATEGY)
 }
 
-func NewMnScanWithStrategy(fcn FCNBase, par []float64, err []float64, stra int) *MnScan {
-	return NewMnScanWithStateAndStrategy(fcn, NewUserParamStateFromParamAndErrValues(par, err), NewMnStrategyWithStra(stra))
+func NewMnScanWithStrategy(ctx context.Context, fcn FCNBase, par []float64, err []float64, stra int) *MnScan {
+	return NewMnScanWithStateAndStrategy(ctx, fcn, NewUserParamStateFromParamAndErrValues(par, err), NewMnStrategyWithStra(stra))
 }
 
-func NewMnScanWithCovariance(fcn FCNBase, par []float64, cov *MnUserCovariance) (*MnScan, error) {
-	return NewMnScanWithCovarianceAndStrategy(fcn, par, cov, DEFAULT_STRATEGY)
+func NewMnScanWithCovariance(ctx context.Context, fcn FCNBase, par []float64, cov *MnUserCovariance) (*MnScan, error) {
+	return NewMnScanWithCovarianceAndStrategy(ctx, fcn, par, cov, DEFAULT_STRATEGY)
 }
 
-func NewMnScanWithCovarianceAndStrategy(fcn FCNBase, par []float64, cov *MnUserCovariance, stra int) (*MnScan, error) {
+func NewMnScanWithCovarianceAndStrategy(ctx context.Context, fcn FCNBase, par []float64, cov *MnUserCovariance, stra int) (*MnScan, error) {
 	state, fnErr := NewMnUserParameterStateFlUc(par, cov)
 	if fnErr != nil {
 		return nil, fnErr
 	}
-	return NewMnScanWithStateAndStrategy(fcn, state, NewMnStrategyWithStra(stra)), nil
+	return NewMnScanWithStateAndStrategy(ctx, fcn, state, NewMnStrategyWithStra(stra)), nil
 }
 
-func NewMnScanWithParameters(fcn FCNBase, par *MnUserParameters) *MnScan {
-	return NewMnScanWithParametersAndStrategy(fcn, par, DEFAULT_STRATEGY)
+func NewMnScanWithParameters(ctx context.Context, fcn FCNBase, par *MnUserParameters) *MnScan {
+	return NewMnScanWithParametersAndStrategy(ctx, fcn, par, DEFAULT_STRATEGY)
 }
 
-func NewMnScanWithParametersAndStrategy(fcn FCNBase, par *MnUserParameters, stra int) *MnScan {
-	return NewMnScanWithStateAndStrategy(fcn, NewUserParameterStateFromUserParameter(par), NewMnStrategyWithStra(stra))
+func NewMnScanWithParametersAndStrategy(ctx context.Context, fcn FCNBase, par *MnUserParameters, stra int) *MnScan {
+	return NewMnScanWithStateAndStrategy(ctx, fcn, NewUserParameterStateFromUserParameter(par), NewMnStrategyWithStra(stra))
 }
 
-func NewMnScanWithParametersAndCovariance(fcn FCNBase, par *MnUserParameters, cov *MnUserCovariance) (*MnScan, error) {
-	return NewMnScanWithParametersAndCovarianceAndStrategy(fcn, par, cov, DEFAULT_STRATEGY)
+func NewMnScanWithParametersAndCovariance(ctx context.Context, fcn FCNBase, par *MnUserParameters, cov *MnUserCovariance) (*MnScan, error) {
+	return NewMnScanWithParametersAndCovarianceAndStrategy(ctx, fcn, par, cov, DEFAULT_STRATEGY)
 }
 
-func NewMnScanWithParametersAndCovarianceAndStrategy(fcn FCNBase, par *MnUserParameters, cov *MnUserCovariance,
+func NewMnScanWithParametersAndCovarianceAndStrategy(ctx context.Context, fcn FCNBase, par *MnUserParameters, cov *MnUserCovariance,
 	stra int) (*MnScan, error) {
 	state, fnErr := NewUserParamStateFromUserParamCovariance(par, cov)
 	if fnErr != nil {
 		return nil, fnErr
 	}
-	return NewMnScanWithStateAndStrategy(fcn, state, NewMnStrategyWithStra(stra)), nil
+	return NewMnScanWithStateAndStrategy(ctx, fcn, state, NewMnStrategyWithStra(stra)), nil
 }
 
-func NewMnScanWithStateAndStrategy(fcn FCNBase, state *MnUserParameterState, str *MnStrategy) *MnScan {
+func NewMnScanWithStateAndStrategy(ctx context.Context, fcn FCNBase, state *MnUserParameterState, str *MnStrategy) *MnScan {
 	ret := &MnScan{
 		baseImpl:     NewMnApplicationWithFcnStateStra(fcn, state, str),
 		theMinimizer: NewScanMinimizer(),

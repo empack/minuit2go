@@ -1,6 +1,7 @@
 package minuit
 
 import (
+	"context"
 	"log"
 	"math"
 )
@@ -12,7 +13,8 @@ func NewSimplexBuilder() *SimplexBuilder {
 	return &SimplexBuilder{}
 }
 
-func (this *SimplexBuilder) Minimum(mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, minedm float64) (*FunctionMinimum, error) {
+// TODO: ADD BREAKPOINT
+func (this *SimplexBuilder) Minimum(ctx context.Context, mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, minedm float64) (*FunctionMinimum, error) {
 	var prec *MnMachinePrecision = seed.precision()
 	var x *MnAlgebraicVector = seed.parameters().vec().Clone()
 	var step *MnAlgebraicVector = MnUtils.MulV(seed.gradient().gstep(), 10.0)

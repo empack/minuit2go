@@ -1,6 +1,9 @@
 package minuit
 
-import "math"
+import (
+	"context"
+	"math"
+)
 
 /* Performs a minimization using the simplex method of Nelder and Mead
  * (ref. Comp. J. 7, 308 (1965)).
@@ -12,7 +15,8 @@ func NewScanBuilder() *ScanBuilder {
 	return &ScanBuilder{}
 }
 
-func (s ScanBuilder) Minimum(mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
+// TODO: ADD BREAKPOINT
+func (s ScanBuilder) Minimum(ctx context.Context, mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
 	var x *MnAlgebraicVector = seed.parameters().vec().Clone()
 	upst, fnErr := NewMnUserParameterStateMsFlUt(seed.state(), mfcn.errorDef(), seed.trafo())
 	if fnErr != nil {

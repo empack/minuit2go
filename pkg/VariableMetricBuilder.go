@@ -1,6 +1,7 @@
 package minuit
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -18,10 +19,10 @@ func NewVariableMetricBuilder() *VariableMetricBuilder {
 	}
 }
 
-func (this *VariableMetricBuilder) Minimum(fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy,
+func (this *VariableMetricBuilder) Minimum(ctx context.Context, fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy,
 	maxfcn int,
 	edmval float64) (*FunctionMinimum, error) {
-	fmin, err := this.minimum(fcn, gc, seed, maxfcn, edmval)
+	fmin, err := this.minimum(ctx, fcn, gc, seed, maxfcn, edmval)
 	if err != nil {
 		return nil, err
 	}
@@ -41,8 +42,7 @@ func (this *VariableMetricBuilder) Minimum(fcn MnFcnInterface, gc GradientCalcul
 	return fmin, nil
 }
 
-func (this *VariableMetricBuilder) minimum(fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, maxfcn int,
-	edmval float64) (*FunctionMinimum, error) {
+func (this *VariableMetricBuilder) minimum(ctx context.Context, fcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, maxfcn int, edmval float64) (*FunctionMinimum, error) {
 	edmval *= 1.0e-4
 	if seed.parameters().vec().size() == 0 {
 		return NewFunctionMinimumWithSeedUp(seed, fcn.errorDef()), nil

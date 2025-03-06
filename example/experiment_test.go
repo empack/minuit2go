@@ -1,6 +1,7 @@
 package example
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"math/rand"
@@ -105,7 +106,7 @@ func TestExperimentalFit(t *testing.T) {
 	println("start migrad")
 	migrad := minuit.NewMnMigradWithParametersStra(theFCN, upar, minuit.PreciseStrategy)
 	//migrad := minuit.MinimizeWithMaxfcnToler(theFCN, upar,)
-	min, err := migrad.Minimize()
+	min, err := migrad.Minimize(context.TODO())
 	if err != nil {
 		t.Fatalf("minimize failed with:\n %s\n", err.Error())
 	}
@@ -114,7 +115,7 @@ func TestExperimentalFit(t *testing.T) {
 	if !min.IsValid() {
 		println("FM is invalid, try with strategy = 2.")
 		migrad2 := minuit.NewMnMigradWithParameterStateStrategy(theFCN, min.UserState(), minuit.NewMnStrategyWithStra(2))
-		min, err = migrad2.Minimize()
+		min, err = migrad2.Minimize(context.TODO())
 		if err != nil {
 			t.Fatalf("minimize failed with:\n %s\n", err.Error())
 		}

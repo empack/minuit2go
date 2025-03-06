@@ -1,10 +1,12 @@
 package minuit
 
+import "context"
+
 type ModularFunctionMinimizerInterface interface {
 	SeedGenerator() MinimumSeedGenerator
 	Builder() MinimumBuilder
-	minimizeWithError(fcn FCNBase, st *MnUserParameterState, strategy *MnStrategy, maxfcn int, toler, errorDef float64, useAnalyticalGradient, checkGradient bool) (*FunctionMinimum, error)
-	minimize(mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error)
+	minimizeWithError(ctx context.Context, fcn FCNBase, st *MnUserParameterState, strategy *MnStrategy, maxfcn int, toler, errorDef float64, useAnalyticalGradient, checkGradient bool) (*FunctionMinimum, error)
+	minimize(ctx context.Context, mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error)
 }
 type ModularFunctionMinimizer struct {
 	ModularFunctionMinimizerInterface
@@ -15,7 +17,7 @@ func NewModularFunctionMinimizer() *ModularFunctionMinimizer {
 	return &ModularFunctionMinimizer{}
 }
 
-func (this *ModularFunctionMinimizer) minimizeWithError(fcn FCNBase, st *MnUserParameterState, strategy *MnStrategy, maxfcn int, toler, errorDef float64, useAnalyticalGradient, checkGradient bool) (*FunctionMinimum, error) {
+func (this *ModularFunctionMinimizer) minimizeWithError(ctx context.Context, fcn FCNBase, st *MnUserParameterState, strategy *MnStrategy, maxfcn int, toler, errorDef float64, useAnalyticalGradient, checkGradient bool) (*FunctionMinimum, error) {
 	var mfcn *MnUserFcn = NewMnUserFcn(fcn, errorDef, st.trafo())
 
 	var gc GradientCalculator
@@ -34,11 +36,11 @@ func (this *ModularFunctionMinimizer) minimizeWithError(fcn FCNBase, st *MnUserP
 		return nil, err
 	}
 
-	return this.minimize(mfcn, gc, mnseeds, strategy, maxfcn, toler)
+	return this.minimize(ctx, mfcn, gc, mnseeds, strategy, maxfcn, toler)
 }
 
-func (this *ModularFunctionMinimizer) minimize(mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
-	return this.super.Builder().Minimum(mfcn, gc, seed, strategy, maxfcn, toler*mfcn.errorDef())
+func (this *ModularFunctionMinimizer) minimize(ctx context.Context, mfcn MnFcnInterface, gc GradientCalculator, seed *MinimumSeed, strategy *MnStrategy, maxfcn int, toler float64) (*FunctionMinimum, error) {
+	return this.super.Builder().Minimum(ctx, mfcn, gc, seed, strategy, maxfcn, toler*mfcn.errorDef())
 }
 
 func (this *ModularFunctionMinimizer) SeedGenerator() MinimumSeedGenerator {

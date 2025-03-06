@@ -1,6 +1,7 @@
 package minuit
 
 import (
+	"context"
 	"log"
 	"math"
 )
@@ -23,7 +24,7 @@ func NewMnFunctionCross(fcn FCNBase, state *MnUserParameterState, fval float64, 
 	}
 }
 
-func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tlr float64, maxcalls int) (*MnCross, error) {
+func (this *MnFunctionCross) cross(ctx context.Context, par []int, pmid []float64, pdir []float64, tlr float64, maxcalls int) (*MnCross, error) {
 	var npar int = len(par)
 	var nfcn int = 0
 	var prec *MnMachinePrecision = this.theState.Precision()
@@ -71,7 +72,7 @@ func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tl
 		migrad.SetValue(par[i], pmid[i])
 	}
 
-	min0, _ := migrad.MinimizeWithMaxfcnToler(maxcalls, tlr)
+	min0, _ := migrad.MinimizeWithMaxfcnToler(ctx, maxcalls, tlr)
 	nfcn += min0.Nfcn()
 
 	if min0.hasReachedCallLimit() {
@@ -109,7 +110,7 @@ func (this *MnFunctionCross) cross(par []int, pmid []float64, pdir []float64, tl
 		migrad.SetValue(par[i], pmid[i]+(aopt)*pdir[i])
 	}
 
-	min1, _ := migrad.MinimizeWithMaxfcnToler(maxcalls, tlr)
+	min1, _ := migrad.MinimizeWithMaxfcnToler(ctx, maxcalls, tlr)
 	nfcn += min1.Nfcn()
 
 	if min1.hasReachedCallLimit() {
@@ -150,7 +151,7 @@ L300:
 				for i := 0; i < npar; i++ {
 					migrad.SetValue(par[i], pmid[i]+(aopt)*pdir[i])
 				}
-				min1, _ = migrad.MinimizeWithMaxfcnToler(maxcalls, tlr)
+				min1, _ = migrad.MinimizeWithMaxfcnToler(ctx, maxcalls, tlr)
 				nfcn += min1.Nfcn()
 
 				if min1.hasReachedCallLimit() {
@@ -209,7 +210,7 @@ L300:
 			for i := 0; i < npar; i++ {
 				migrad.SetValue(par[i], pmid[i]+(aopt)*pdir[i])
 			}
-			min2, _ = migrad.MinimizeWithMaxfcnToler(maxcalls, tlr)
+			min2, _ = migrad.MinimizeWithMaxfcnToler(ctx, maxcalls, tlr)
 			nfcn += min2.Nfcn()
 
 			if min2.hasReachedCallLimit() {
@@ -362,7 +363,7 @@ L300:
 		for i := 0; i < npar; i++ {
 			migrad.SetValue(par[i], pmid[i]+(aopt)*pdir[i])
 		}
-		min2, err := migrad.MinimizeWithMaxfcnToler(maxcalls, tlr)
+		min2, err := migrad.MinimizeWithMaxfcnToler(ctx, maxcalls, tlr)
 		if err != nil {
 			return nil, err
 		}

@@ -1,6 +1,7 @@
 package minuit
 
 import (
+	"context"
 	"errors"
 	"log"
 	"math"
@@ -31,12 +32,12 @@ func NewMnMinosWithFunctionMinimumStrategy(fcn FCNBase, min *FunctionMinimum, st
 	}
 }
 
-func (this *MnMinos) minos(par int) (*MinosError, error) {
-	return this.minosWithErrDef(par, 1.)
+func (this *MnMinos) minos(ctx context.Context, par int) (*MinosError, error) {
+	return this.minosWithErrDef(ctx, par, 1.)
 }
 
-func (this *MnMinos) minosWithErrDef(par int, errDef float64) (*MinosError, error) {
-	return this.minosWithErrDefMaxCalls(par, errDef, DEFAULT_MAXFCN)
+func (this *MnMinos) minosWithErrDef(ctx context.Context, par int, errDef float64) (*MinosError, error) {
+	return this.minosWithErrDefMaxCalls(ctx, par, errDef, DEFAULT_MAXFCN)
 }
 
 /**
@@ -47,7 +48,7 @@ func (this *MnMinos) minosWithErrDef(par int, errDef float64) (*MinosError, erro
  * @param maxcalls Specifies the (approximate) maximum number of function calls per parameter
  * requested, after which the calculation will be stopped for that parameter.
  */
-func (this *MnMinos) minosWithErrDefMaxCalls(par int, errDef float64, maxcalls int) (*MinosError, error) {
+func (this *MnMinos) minosWithErrDefMaxCalls(ctx context.Context, par int, errDef float64, maxcalls int) (*MinosError, error) {
 	if !this.theMinimum.IsValid() {
 		return nil, errors.New("assertion violation: Minimum is Invalid")
 	}
@@ -58,11 +59,11 @@ func (this *MnMinos) minosWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 		return nil, errors.New("assertion violation: parameter is constant")
 	}
 
-	up, err := this.UpvalWithErrDefMaxCalls(par, errDef, maxcalls)
+	up, err := this.UpvalWithErrDefMaxCalls(ctx, par, errDef, maxcalls)
 	if err != nil {
 		return nil, err
 	}
-	lo, err := this.LovalWithErrDefMaxCalls(par, errDef, maxcalls)
+	lo, err := this.LovalWithErrDefMaxCalls(ctx, par, errDef, maxcalls)
 	if err != nil {
 		return nil, err
 	}
@@ -70,12 +71,12 @@ func (this *MnMinos) minosWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	return NewMinosErrorWithValues(par, this.theMinimum.UserState().Value(par), lo, up), nil
 }
 
-func (this *MnMinos) Range(par int) (*Point, error) {
-	return this.RangeWithErrDef(par, 1)
+func (this *MnMinos) Range(ctx context.Context, par int) (*Point, error) {
+	return this.RangeWithErrDef(ctx, par, 1)
 }
 
-func (this *MnMinos) RangeWithErrDef(par int, errDef float64) (*Point, error) {
-	return this.RangeWithErrDefMaxCalls(par, errDef, DEFAULT_MAXFCN)
+func (this *MnMinos) RangeWithErrDef(ctx context.Context, par int, errDef float64) (*Point, error) {
+	return this.RangeWithErrDefMaxCalls(ctx, par, errDef, DEFAULT_MAXFCN)
 }
 
 // RangeWithErrDefMaxCalls
@@ -83,28 +84,28 @@ func (this *MnMinos) RangeWithErrDef(par int, errDef float64) (*Point, error) {
  * Causes a MINOS error analysis for external parameter n.
  * @return The lower and upper bounds of parameter
  */
-func (this *MnMinos) RangeWithErrDefMaxCalls(par int, errDef float64, maxcalls int) (*Point, error) {
-	mnerr, err := this.minosWithErrDefMaxCalls(par, errDef, maxcalls)
+func (this *MnMinos) RangeWithErrDefMaxCalls(ctx context.Context, par int, errDef float64, maxcalls int) (*Point, error) {
+	mnerr, err := this.minosWithErrDefMaxCalls(ctx, par, errDef, maxcalls)
 	if err != nil {
 		return nil, err
 	}
 	return mnerr.Range(), nil
 }
 
-func (this *MnMinos) Lower(par int) (float64, error) {
-	return this.LowerWithErrDef(par, 1)
+func (this *MnMinos) Lower(ctx context.Context, par int) (float64, error) {
+	return this.LowerWithErrDef(ctx, par, 1)
 }
 
-func (this *MnMinos) LowerWithErrDef(par int, errDef float64) (float64, error) {
-	return this.LowerWithErrDefMaxCalls(par, errDef, DEFAULT_MAXFCN)
+func (this *MnMinos) LowerWithErrDef(ctx context.Context, par int, errDef float64) (float64, error) {
+	return this.LowerWithErrDefMaxCalls(ctx, par, errDef, DEFAULT_MAXFCN)
 }
 
 // LowerWithErrDefMaxCalls
 /** calculate one side (negative or positive error) of the parameter */
-func (this *MnMinos) LowerWithErrDefMaxCalls(par int, errDef float64, maxcalls int) (float64, error) {
+func (this *MnMinos) LowerWithErrDefMaxCalls(ctx context.Context, par int, errDef float64, maxcalls int) (float64, error) {
 	var upar *MnUserParameterState = this.theMinimum.UserState()
 	var err float64 = this.theMinimum.UserState().Error(par)
-	aopt, fnErr := this.LovalWithErrDefMaxCalls(par, errDef, maxcalls)
+	aopt, fnErr := this.LovalWithErrDefMaxCalls(ctx, par, errDef, maxcalls)
 	if fnErr != nil {
 		return 0, fnErr
 	}
@@ -117,18 +118,18 @@ func (this *MnMinos) LowerWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	}
 }
 
-func (this *MnMinos) Upper(par int) (float64, error) {
-	return this.UpperWithErrDef(par, 1)
+func (this *MnMinos) Upper(ctx context.Context, par int) (float64, error) {
+	return this.UpperWithErrDef(ctx, par, 1)
 }
 
-func (this *MnMinos) UpperWithErrDef(par int, errDef float64) (float64, error) {
-	return this.UpperWithErrDefMaxCalls(par, errDef, DEFAULT_MAXFCN)
+func (this *MnMinos) UpperWithErrDef(ctx context.Context, par int, errDef float64) (float64, error) {
+	return this.UpperWithErrDefMaxCalls(ctx, par, errDef, DEFAULT_MAXFCN)
 }
 
-func (this *MnMinos) UpperWithErrDefMaxCalls(par int, errDef float64, maxcalls int) (float64, error) {
+func (this *MnMinos) UpperWithErrDefMaxCalls(ctx context.Context, par int, errDef float64, maxcalls int) (float64, error) {
 	var upar *MnUserParameterState = this.theMinimum.UserState()
 	var err float64 = this.theMinimum.UserState().Error(par)
-	aopt, fnErr := this.UpvalWithErrDefMaxCalls(par, errDef, maxcalls)
+	aopt, fnErr := this.UpvalWithErrDefMaxCalls(ctx, par, errDef, maxcalls)
 	if fnErr != nil {
 		return 0, fnErr
 	}
@@ -141,15 +142,15 @@ func (this *MnMinos) UpperWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	}
 }
 
-func (this *MnMinos) Loval(par int) (*MnCross, error) {
-	return this.LovalWithErrDef(par, 1)
+func (this *MnMinos) Loval(ctx context.Context, par int) (*MnCross, error) {
+	return this.LovalWithErrDef(ctx, par, 1)
 }
 
-func (this *MnMinos) LovalWithErrDef(par int, errDef float64) (*MnCross, error) {
-	return this.LovalWithErrDefMaxCalls(par, errDef, DEFAULT_MAXFCN)
+func (this *MnMinos) LovalWithErrDef(ctx context.Context, par int, errDef float64) (*MnCross, error) {
+	return this.LovalWithErrDefMaxCalls(ctx, par, errDef, DEFAULT_MAXFCN)
 }
 
-func (this *MnMinos) LovalWithErrDefMaxCalls(par int, errDef float64, maxcalls int) (*MnCross, error) {
+func (this *MnMinos) LovalWithErrDefMaxCalls(ctx context.Context, par int, errDef float64, maxcalls int) (*MnCross, error) {
 	errDef *= this.theMinimum.ErrorDef()
 	if !this.theMinimum.IsValid() {
 		return nil, errors.New("assertion violation: Minimum is Invalid")
@@ -198,7 +199,7 @@ func (this *MnMinos) LovalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 
 	var toler float64 = 0.1
 	var cross *MnFunctionCross = NewMnFunctionCross(this.theFCN, upar, this.theMinimum.Fval(), this.theStrategy, errDef)
-	aopt, fnErr := cross.cross(para, xmid, xdir, toler, maxcalls)
+	aopt, fnErr := cross.cross(ctx, para, xmid, xdir, toler, maxcalls)
 	if fnErr != nil {
 		return nil, fnErr
 	}
@@ -218,13 +219,13 @@ func (this *MnMinos) LovalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 	return aopt, nil
 }
 
-func (this *MnMinos) Upval(par int) (*MnCross, error) {
-	return this.UpvalWithErrDef(par, 1)
+func (this *MnMinos) Upval(ctx context.Context, par int) (*MnCross, error) {
+	return this.UpvalWithErrDef(ctx, par, 1)
 }
-func (this *MnMinos) UpvalWithErrDef(par int, errDef float64) (*MnCross, error) {
-	return this.UpvalWithErrDefMaxCalls(par, errDef, DEFAULT_MAXFCN)
+func (this *MnMinos) UpvalWithErrDef(ctx context.Context, par int, errDef float64) (*MnCross, error) {
+	return this.UpvalWithErrDefMaxCalls(ctx, par, errDef, DEFAULT_MAXFCN)
 }
-func (this *MnMinos) UpvalWithErrDefMaxCalls(par int, errDef float64, maxcalls int) (*MnCross, error) {
+func (this *MnMinos) UpvalWithErrDefMaxCalls(ctx context.Context, par int, errDef float64, maxcalls int) (*MnCross, error) {
 	errDef *= this.theMinimum.ErrorDef()
 	if !this.theMinimum.IsValid() {
 		return nil, errors.New("assertion violation: Minimum is Invalid")
@@ -272,7 +273,7 @@ func (this *MnMinos) UpvalWithErrDefMaxCalls(par int, errDef float64, maxcalls i
 
 	var toler float64 = 0.1
 	var cross *MnFunctionCross = NewMnFunctionCross(this.theFCN, upar, this.theMinimum.Fval(), this.theStrategy, errDef)
-	aopt, fnErr := cross.cross(para, xmid, xdir, toler, maxcalls)
+	aopt, fnErr := cross.cross(ctx, para, xmid, xdir, toler, maxcalls)
 	if fnErr != nil {
 		return nil, fnErr
 	}

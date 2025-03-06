@@ -1,6 +1,7 @@
 package minuit
 
 import (
+	"context"
 	"errors"
 	"log"
 	"math"
@@ -30,11 +31,11 @@ func NewMnContoursWithStrategy(fcn FCNBase, min *FunctionMinimum, stra *MnStrate
 	}
 }
 
-func (this *MnContours) Points(px, py int) ([]*Point, error) {
-	return this.PointsWithError(px, py, 1)
+func (this *MnContours) Points(ctx context.Context, px, py int) ([]*Point, error) {
+	return this.PointsWithError(ctx, px, py, 1)
 }
-func (this *MnContours) PointsWithError(px, py int, errDef float64) ([]*Point, error) {
-	return this.PointsWithErrorN(px, py, errDef, 20)
+func (this *MnContours) PointsWithError(ctx context.Context, px, py int, errDef float64) ([]*Point, error) {
+	return this.PointsWithErrorN(ctx, px, py, errDef, 20)
 }
 
 // PointsWithErrorN
@@ -46,19 +47,19 @@ func (this *MnContours) PointsWithError(px, py int, errDef float64) ([]*Point, e
  * calculate more than one contour, the user needs to set the error definition in
  * its FCN to the appropriate value for the desired confidence level and call this method for each contour.
  */
-func (this *MnContours) PointsWithErrorN(px, py int, errDef float64, npoints int) ([]*Point, error) {
-	cont, err := this.ContourWithErrorN(px, py, errDef, npoints)
+func (this *MnContours) PointsWithErrorN(ctx context.Context, px, py int, errDef float64, npoints int) ([]*Point, error) {
+	cont, err := this.ContourWithErrorN(ctx, px, py, errDef, npoints)
 	if err != nil {
 		return nil, err
 	}
 	return cont.Points(), nil
 }
 
-func (this *MnContours) Contour(px, py int) (*ContoursError, error) {
-	return this.ContourWithError(px, py, 1)
+func (this *MnContours) Contour(ctx context.Context, px, py int) (*ContoursError, error) {
+	return this.ContourWithError(ctx, px, py, 1)
 }
-func (this *MnContours) ContourWithError(px, py int, errDef float64) (*ContoursError, error) {
-	return this.ContourWithErrorN(px, py, errDef, 20)
+func (this *MnContours) ContourWithError(ctx context.Context, px, py int, errDef float64) (*ContoursError, error) {
+	return this.ContourWithErrorN(ctx, px, py, errDef, 20)
 }
 
 /**
@@ -66,7 +67,7 @@ func (this *MnContours) ContourWithError(px, py int, errDef float64) (*ContoursE
  * a by-product ContoursError keeps the MinosError information of parameters parx and
  * pary. The result ContoursError can be easily printed using MnPrint or toString().
  */
-func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints int) (*ContoursError, error) {
+func (this *MnContours) ContourWithErrorN(ctx context.Context, px, py int, errDef float64, npoints int) (*ContoursError, error) {
 	errDef *= this.theMinimum.ErrorDef()
 	if npoints <= 3 {
 		return nil, errors.New("assertion violation: number of points must be greater than 3")
@@ -83,7 +84,7 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 	var valx float64 = this.theMinimum.UserState().Value(px)
 	var valy float64 = this.theMinimum.UserState().Value(py)
 
-	mex, _ := minos.minosWithErrDef(px, errDef)
+	mex, _ := minos.minosWithErrDef(ctx, px, errDef)
 	nfcn += mex.Nfcn()
 	if !mex.IsValid() {
 		log.Println("MnContours is unable to find first two points.")
@@ -91,7 +92,7 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 	}
 	var ex *Point = mex.Range()
 
-	mey, _ := minos.minosWithErrDef(py, errDef)
+	mey, _ := minos.minosWithErrDef(ctx, py, errDef)
 	nfcn += mey.Nfcn()
 	if !mey.IsValid() {
 		log.Println("MnContours is unable to find second two points.")
@@ -103,7 +104,7 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 
 	migrad.Fix(px)
 	migrad.SetValue(px, valx+ex.second)
-	exy_up, _ := migrad.Minimize()
+	exy_up, _ := migrad.Minimize(ctx)
 	nfcn += exy_up.Nfcn()
 	if !exy_up.IsValid() {
 		log.Printf("MnContours is unable to find upper y value for x parameter %d.\n", px)
@@ -111,7 +112,7 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 	}
 
 	migrad.SetValue(px, valx+ex.first)
-	exy_lo, _ := migrad.Minimize()
+	exy_lo, _ := migrad.Minimize(ctx)
 	nfcn += exy_lo.Nfcn()
 	if !exy_lo.IsValid() {
 		log.Printf("MnContours is unable to find lower y value for x parameter %d.\n", px)
@@ -121,7 +122,7 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 	var migrad1 *MnMigrad = NewMnMigradWithParameterStateStrategy(this.theFCN, this.theMinimum.UserState().clone(), NewMnStrategyWithStra(max(0, this.theStrategy.Strategy()-1)))
 	migrad1.Fix(py)
 	migrad1.SetValue(py, valy+ey.second)
-	eyx_up, _ := migrad1.Minimize()
+	eyx_up, _ := migrad1.Minimize(ctx)
 	nfcn += eyx_up.Nfcn()
 	if !eyx_up.IsValid() {
 		log.Printf("MnContours is unable to find upper x value for y parameter %d.\n", py)
@@ -129,7 +130,7 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 	}
 
 	migrad1.SetValue(py, valy+ey.first)
-	eyx_lo, _ := migrad1.Minimize()
+	eyx_lo, _ := migrad1.Minimize(ctx)
 	nfcn += eyx_lo.Nfcn()
 	if !eyx_lo.IsValid() {
 		log.Printf("MnContours is unable to find lower x value for y parameter %d.\n", py)
@@ -192,7 +193,7 @@ func (this *MnContours) ContourWithErrorN(px, py int, errDef float64, npoints in
 			var pmid []float64 = []float64{xmidcr, ymidcr}
 			var pdir []float64 = []float64{xdircr, ydircr}
 
-			opt, err := cross.cross(par, pmid, pdir, toler, maxcalls)
+			opt, err := cross.cross(ctx, par, pmid, pdir, toler, maxcalls)
 			if err != nil {
 				return nil, err
 			}

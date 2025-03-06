@@ -1,6 +1,7 @@
 package example
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"slices"
@@ -78,7 +79,7 @@ func TestRene(t *testing.T) {
 
 	println("start migrad")
 	var migrad *minuit.MnMigrad = minuit.NewMnMigradWithParameters(theFCN, upar)
-	min, err := migrad.Minimize()
+	min, err := migrad.Minimize(context.TODO())
 	if err != nil {
 		t.Fatalf("minimize failed with:\n %s\n", err.Error())
 	}
@@ -86,7 +87,7 @@ func TestRene(t *testing.T) {
 		//try with higher strategy
 		println("FM is invalid, try with strategy = 2.")
 		var migrad2 *minuit.MnMigrad = minuit.NewMnMigradWithParameterStateStrategy(theFCN, min.UserState(), minuit.NewMnStrategyWithStra(2))
-		min, err = migrad2.Minimize()
+		min, err = migrad2.Minimize(context.TODO())
 		if err != nil {
 			t.Fatalf("minimize failed with:\n %s\n", err.Error())
 		}
@@ -98,7 +99,7 @@ func TestRene(t *testing.T) {
 	{
 		var params []float64 = []float64{1, 1, 1, 1, 1, 1}
 		var error []float64 = []float64{1, 1, 1, 1, 1, 1}
-		var scan *minuit.MnScan = minuit.NewMnScan(theFCN, params, error)
+		var scan *minuit.MnScan = minuit.NewMnScan(context.TODO(), theFCN, params, error)
 		fmt.Printf("scan parameters: %s\n", scan.Parameters())
 		var plot *minuit.MnPlot = minuit.NewMnPlot()
 		for i := 0; i < upar.VariableParameters(); i++ {
@@ -114,9 +115,9 @@ func TestRene(t *testing.T) {
 	{
 		var params []float64 = []float64{1, 1, 1, 1, 1, 1}
 		var error []float64 = []float64{1, 1, 1, 1, 1, 1}
-		var scan *minuit.MnScan = minuit.NewMnScan(theFCN, params, error)
+		var scan *minuit.MnScan = minuit.NewMnScan(context.TODO(), theFCN, params, error)
 		fmt.Printf("scan parameters: %s\n", scan.Parameters())
-		min2, err := scan.Minimize()
+		min2, err := scan.Minimize(context.TODO())
 		if err != nil {
 			t.Fatalf("minimize failed with:\n %s\n", err.Error())
 		}
