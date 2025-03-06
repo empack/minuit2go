@@ -20,30 +20,6 @@ To install minuit2go, use the following `go get` command:
 go get github.com/empack/minuit2go
 ```
 
-## Usage
-
-Here is a basic example of how to use minuit2go in your project:
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/empack/minuit2go"
-)
-
-func main() {
-    // Example usage of minuit2go
-    optimizer := minuit2go.NewOptimizer()
-    result := optimizer.Optimize(func(x []float64) float64 {
-        // Define your objective function here
-        return x[0]*x[0] + x[1]*x[1]
-    }, []float64{1.0, 2.0})
-
-    fmt.Printf("Optimization Result: %+v\n", result)
-}
-```
-
 ## Contact
 
 For any questions or suggestions, feel free to open an issue or contact the project maintainers.
